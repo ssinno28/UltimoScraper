@@ -20,17 +20,17 @@ jobs:
         dotnet-version: '6.0.x'
           
     - name: Restore Solution
-      run: dotnet restore WebScraper.sln
+      run: dotnet restore UltimoScraper.sln
       
     - name: Build Solution
-      run: dotnet build WebScraper.sln  
+      run: dotnet build UltimoScraper.sln  
       
     - name: Test Solution
-      run: dotnet test WebScraper.sln    
+      run: dotnet test UltimoScraper.sln    
     
-    - name: Publish UltimoScraper
-      uses: alirezanet/publish-nuget@v3.0.0
-      with:
-          PROJECT_FILE_PATH: UltimoScraper/UltimoScraper.csproj
-          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-          INCLUDE_SYMBOLS: true
+    #- name: Publish UltimoScraper
+    #  uses: alirezanet/publish-nuget@v3.0.0
+    #  with:
+    #      PROJECT_FILE_PATH: UltimoScraper/UltimoScraper.csproj
+    #      NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+    #      INCLUDE_SYMBOLS: true
