@@ -9,12 +9,16 @@
     <None Remove="Samples\no-list-sample.html" />
     <None Remove="Samples\p-list-broken-sample.html" />
     <None Remove="Samples\p-list-sample.html" />
+    <None Remove="Samples\robots.txt" />
     <None Remove="Samples\table-sample.html" />
     <None Remove="Samples\unopened-elements-sample.html" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Samples\no-list-sample.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Samples\robots.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Samples\unopened-elements-sample.html">
@@ -34,6 +38,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="Moq" Version="4.17.2" />
     <PackageReference Include="NUnit" Version="3.13.3" />

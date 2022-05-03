@@ -1,0 +1,13 @@
+﻿User-agent: *
+allow: /$
+allow: /norfolk/index.cfm$
+allow: /marlboro/index.cfm$
+allow: /taunton/index.cfm$
+disallow: /norfolk/content/
+disallow: /marlboro/content/
+disallow: /taunton/content/
+disallow: /*?Fuseaction=Schedules*
+disallow: /*?Fuseaction=AvailableSchedules*
+disallow: /*?Fuseaction=ScheduleDetail*
+disallow: /*?Fuseaction=TeamSchedule*
+disallow: /*?Fuseaction=getclient*

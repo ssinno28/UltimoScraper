@@ -11,6 +11,8 @@ using UltimoScraper.Interfaces.Threaders;
 using UltimoScraper.Managers;
 using UltimoScraper.Models;
 using UltimoScraper.Parsers;
+using UltimoScraper.Providers;
+using UltimoScraper.Retrievers;
 using UltimoScraper.Retrievers.Lists;
 
 namespace UltimoScraper.Helpers
@@ -39,6 +41,8 @@ namespace UltimoScraper.Helpers
         {
             serviceCollection.AddScoped<IWebParser, DefaultWebParser>();
             serviceCollection.AddScoped<IListRetriever, DefaultListRetriever>();
+            serviceCollection.AddScoped<IRobotsTxtRetriever, RobotsTxtRetriever>();
+            serviceCollection.AddScoped<IHttpClientProvider, HttpClientProvider>();
             serviceCollection.AddSingleton<IPageManager, PageManager>();
             serviceCollection.AddSingleton<IStopWatchManager, StopWatchManager>();
             serviceCollection.Configure<ScraperConfig>(config =>
