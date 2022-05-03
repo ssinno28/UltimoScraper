@@ -1,0 +1,30 @@
+﻿using System;
+using System.Text.RegularExpressions;
+using System.Web;
+
+namespace UltimoScraper.Helpers
+{
+    public static class StringHelpers
+    {
+        public static bool IsValidUrl(this string url)
+        {
+            bool result = Uri.TryCreate(url, UriKind.Absolute, out var uriResult)
+                          && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
+            return result;
+        }
+
+        public static string GetUrlFromText(this string value)
+        {
+            var decodedValue = HttpUtility.HtmlDecode(value);
+            var match = Regex.Match(decodedValue, @"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?");
+            return match.Value;
+        }
+
+        public static bool IsSiteDomain(this string url, Uri domain)
+        {
+            bool uriCreated = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
+            return uriCreated && (!uri.IsAbsoluteUri || uri.Authority.Equals(domain.Authority));
+        }
+    }
+}
