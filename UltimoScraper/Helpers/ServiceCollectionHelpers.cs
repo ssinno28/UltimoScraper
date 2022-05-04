@@ -19,7 +19,7 @@ namespace UltimoScraper.Helpers
 {
     public static class ServiceCollectionHelpers
     {
-        public static readonly Func<IServiceProvider, Action<string>> ThrottleFunc = (provider) =>
+        private static readonly Func<IServiceProvider, Action<string>> ThrottleFunc = (provider) =>
             async (sessionName) =>
             {
                 var stopWatchManager = provider.GetService<IStopWatchManager>();
@@ -28,7 +28,9 @@ namespace UltimoScraper.Helpers
 
                 if (!stopWatch.IsRunning) stopWatch.Start();
 
-                while (stopWatch.ElapsedMilliseconds < configOptions.Value.PageThrottle)
+                // minimum page throttle should be 3 seconds
+                var pageThrottle = configOptions.Value.PageThrottle < 3000 ? 3000 : configOptions.Value.PageThrottle;
+                while (stopWatch.ElapsedMilliseconds < pageThrottle)
                 {
                     // wait
                 }

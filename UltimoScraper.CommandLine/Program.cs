@@ -65,7 +65,18 @@ namespace UltimoScraper.CommandLine
 
             // Create the container builder.
             var serviceCollection = new ServiceCollection()
-                .AddLogging(x => x.AddConsole())
+                .AddLogging(builder =>
+                {
+                    builder.ClearProviders();
+                    // Clear Microsoft's default providers (like eventlogs and others)
+                    builder.AddSimpleConsole(options =>
+                    {
+                        options.IncludeScopes = true;
+                        options.SingleLine = true;
+                        options.TimestampFormat = "hh:mm:ss ";
+                    }).SetMinimumLevel(LogLevel.Debug);
+
+                })
                 .AddWebScraper(builder.Build())
                 .AddScoped<IScraperService, ScraperService>();
 

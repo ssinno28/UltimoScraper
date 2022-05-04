@@ -43,8 +43,8 @@ namespace UltimoScraper.Parsers
             IEnumerable<IHtmlDocThreader> htmlDocThreaders,
             IEnumerable<ILinkProcessor> linkProcessors,
             IEnumerable<IPageInteraction> pageInteractions,
-            ILogger<DefaultWebParser> logger, 
-            IPageManager viewManager, 
+            ILogger<DefaultWebParser> logger,
+            IPageManager viewManager,
             Action<string> throttleFunc,
             IOptions<ScraperConfig> scraperConfigOptions)
         {
@@ -62,8 +62,8 @@ namespace UltimoScraper.Parsers
         }
 
         public async Task<ParsedSite> ParseSite(
-            string domain, 
-            IList<IgnoreRule> ignoreRules, 
+            string domain,
+            IList<IgnoreRule> ignoreRules,
             IList<string> keywords,
             string sessionName = null)
         {
@@ -78,11 +78,11 @@ namespace UltimoScraper.Parsers
 
             var parsedPages =
                 await ParsePages(
-                    new Uri(domain), 
-                    siteLink, 
-                    knownLinks, 
-                    ignoreRules, 
-                    keywords, 
+                    new Uri(domain),
+                    siteLink,
+                    knownLinks,
+                    ignoreRules,
+                    keywords,
                     pagesPerKeyword,
                     sessionName);
 
@@ -132,7 +132,7 @@ namespace UltimoScraper.Parsers
 
         public async Task<ParsedPage> ParsePage(string domain, string path, IList<IgnoreRule> ignoreRules, IList<string> keywords, string sessionName = null)
         {
-            sessionName = 
+            sessionName =
                 string.IsNullOrEmpty(sessionName) ? $"scrape-run-{DateTime.Now:O}" : sessionName;
 
             HtmlDocument doc = await GetPageHtml(new Uri(domain), path, sessionName);
@@ -201,12 +201,16 @@ namespace UltimoScraper.Parsers
 
                 var page = await _viewManager.GetPage(sessionName);
                 string decodedString = HttpUtility.HtmlDecode(urlWithScheme);
-                await page.GoToAsync(decodedString, _scraperConfig.PageTimeout, new[]
+
+                _logger.LogDebug($"Starting parse of {decodedString} for domain {domain}");
+
+                var pageTimeout = _scraperConfig.PageTimeout == 0 ? 5000 : _scraperConfig.PageTimeout;
+                await page.GoToAsync(decodedString, pageTimeout, new[]
                 {
                     WaitUntilNavigation.DOMContentLoaded
                 });
 
-                var pageInteraction = 
+                var pageInteraction =
                     _pageInteractions.FirstOrDefault(x => x.IsMatch(urlWithScheme));
 
                 if (pageInteraction != null)
@@ -224,6 +228,7 @@ namespace UltimoScraper.Parsers
                     doc = htmlDocThreader.Thread(doc);
                 }
 
+                _logger.LogDebug($"Finished parse of page {decodedString} for domain {domain}");
                 return doc;
             }
             catch (Exception ex)
@@ -242,7 +247,6 @@ namespace UltimoScraper.Parsers
             IDictionary<string, IList<ParsedPage>> pagesPerKeyword,
             string sessionName)
         {
-            _logger.LogDebug($"Starting parse of {linkToPage} for domain {domain}");
 
             HtmlDocument doc = await GetPageHtml(domain, linkToPage.Value, sessionName);
             if (doc == null) return null;
@@ -255,8 +259,6 @@ namespace UltimoScraper.Parsers
                     .GroupBy(x => x.Value)
                     .Select(x => x.First())
                     .ToList();
-
-            _logger.LogDebug($"Finished parse of page {linkToPage.Value} for domain {domain}");
 
             lock (_thisLock)
             {
