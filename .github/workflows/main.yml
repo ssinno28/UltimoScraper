@@ -28,9 +28,9 @@ jobs:
     - name: Test Solution
       run: dotnet test UltimoScraper.sln    
     
-    #- name: Publish UltimoScraper
-    #  uses: alirezanet/publish-nuget@v3.0.0
-    #  with:
-    #      PROJECT_FILE_PATH: UltimoScraper/UltimoScraper.csproj
-    #      NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-    #      INCLUDE_SYMBOLS: true
+    - name: Publish UltimoScraper
+      uses: alirezanet/publish-nuget@v3.0.0
+      with:
+          PROJECT_FILE_PATH: UltimoScraper/UltimoScraper.csproj
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
