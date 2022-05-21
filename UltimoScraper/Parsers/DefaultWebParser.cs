@@ -255,7 +255,7 @@ namespace UltimoScraper.Parsers
 
             List<ParsedWebLink> webLinks = await GetDocumentLinks(doc, ignoreRules, keywords);
             webLinks =
-                webLinks.Where(x => !knownLinks.Any(kl => kl.Value.Equals(x.Value)) && !x.Value.StartsWith("#"))
+                webLinks.Where(x => !knownLinks.Any(kl => kl.Value.Equals(x.Value)) && !x.Value.StartsWith("#") && !x.Value.StartsWith("mailto"))
                     .GroupBy(x => x.Value)
                     .Select(x => x.First())
                     .ToList();
