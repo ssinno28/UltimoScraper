@@ -22,7 +22,10 @@ namespace UltimoScraper.Processors.LinkProcessors
                     continue;
                 }
 
-                if (!webLink.Text.ToLower().Contains(keyword))
+                var containsKeyword = webLink.Text.ToLower().Contains(keyword) ||
+                                      webLink.Value.ToLower().Contains(keyword);
+
+                if (!containsKeyword)
                 {
                     continue;
                 }
