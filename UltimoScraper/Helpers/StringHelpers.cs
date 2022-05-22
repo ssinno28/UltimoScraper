@@ -26,5 +26,21 @@ namespace UltimoScraper.Helpers
             bool uriCreated = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
             return uriCreated && (!uri.IsAbsoluteUri || uri.Authority.Equals(domain.Authority));
         }
+
+        public static string StripDuplicateForwardSlashes(this string path)
+        {
+            var uriCreated = Uri.TryCreate(path, UriKind.RelativeOrAbsolute, out var uri);
+            if (!uriCreated)
+            {
+                return null;
+            }
+
+            if (uri.IsAbsoluteUri)
+            {
+                return path;
+            }
+
+            return Regex.Replace(path, @"/+", @"/"); ;
+        }
     }
 }
