@@ -144,8 +144,7 @@ namespace UltimoScraper.Parsers
                 BodyHtmlNode = bodyHtmlNode,
                 Url = path,
                 Title = GetDocumentTitle(doc),
-                WebLinks = await GetDocumentLinks(doc, ignoreRules, keywords),
-                ParsedLists = await _listRetriever.GetParsedLists(bodyHtmlNode, ignoreRules)
+                WebLinks = await GetDocumentLinks(doc, ignoreRules, keywords)
             };
 
             return parsedPage;
