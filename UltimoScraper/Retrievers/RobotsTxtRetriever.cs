@@ -40,13 +40,15 @@ namespace UltimoScraper.Retrievers
             string disallow = "disallow:";
             foreach (var ignorePath in ignorePaths)
             {
-                if (!ignorePath.StartsWith(disallow)) continue;
+                if (!ignorePath.ToLower().StartsWith(disallow)) continue;
 
-                var ignoreRule = ignorePath.Substring(disallow.Length, ignorePath.Length - disallow.Length);
+                var ignoreRule = ignorePath.Substring(disallow.Length, ignorePath.Length - disallow.Length).Trim();
+                if (string.IsNullOrEmpty(ignoreRule)) continue;
+
                 ignoreRules.Add(new IgnoreRule
                 {
                     IgnoreRuleType = IgnoreRuleType.Link,
-                    Rule = ignoreRule.Trim()
+                    Rule = ignoreRule
                 });
             }
 

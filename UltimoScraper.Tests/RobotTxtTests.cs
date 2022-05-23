@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,7 @@ namespace UltimoScraper.Tests
         private IServiceProvider _serviceProvider;
         private Mock<IHttpClientProvider> _mockHttpClientProvider;
         private string _robotsTxt;
+        private string _robotsDiffFormatTxt;
 
         [SetUp]
         public void FixtureSetup()
@@ -31,6 +33,11 @@ namespace UltimoScraper.Tests
                 _robotsTxt = reader.ReadToEnd();
             }
 
+            using (Stream stream = File.OpenRead(Path.Combine(assembly.GetAssemblyDirectory(), "Samples", "robots-different-format.txt")))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                _robotsDiffFormatTxt = reader.ReadToEnd();
+            }
 
             _mockHttpClientProvider = new Mock<IHttpClientProvider>();
             // Create the container builder.
@@ -54,6 +61,32 @@ namespace UltimoScraper.Tests
             var robots = await robotsRetriever.GetRobotsTxt(new Uri("https://www.fakesite.com"));
 
             Assert.AreEqual(8, robots.Count);
+        }
+
+        [Test]
+        public async Task Test_Robots_No_Empty_Dissalow()
+        {
+            _mockHttpClientProvider
+                .Setup(x => x.GetStringFromUrl(It.IsAny<string>()))
+                .ReturnsAsync(_robotsDiffFormatTxt);
+
+            var robotsRetriever = _serviceProvider.GetService<IRobotsTxtRetriever>();
+            var robots = await robotsRetriever.GetRobotsTxt(new Uri("https://www.fakesite.com"));
+
+            Assert.False(robots.Any(x => string.IsNullOrEmpty(x.Rule)));
+        }
+        
+        [Test]
+        public async Task Test_Robots_Compares_Lowercase()
+        {
+            _mockHttpClientProvider
+                .Setup(x => x.GetStringFromUrl(It.IsAny<string>()))
+                .ReturnsAsync(_robotsDiffFormatTxt);
+
+            var robotsRetriever = _serviceProvider.GetService<IRobotsTxtRetriever>();
+            var robots = await robotsRetriever.GetRobotsTxt(new Uri("https://www.fakesite.com"));
+
+            Assert.AreEqual(13, robots.Count);
         }
     }
 }
