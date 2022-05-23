@@ -76,6 +76,16 @@ namespace UltimoScraper.Parsers
                 sessionName = $"scrape-run-{DateTime.Now:O}";
             }
 
+            string[] extensionsToIgnore = { ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".svg" };
+            foreach (var ext in extensionsToIgnore)
+            {
+                ignoreRules.Add(new IgnoreRule
+                {
+                    IgnoreRuleType = IgnoreRuleType.Link,
+                    Rule = ext
+                });
+            }
+
             var parsedPages =
                 await ParsePages(
                     new Uri(domain),
@@ -255,8 +265,8 @@ namespace UltimoScraper.Parsers
 
             List<ParsedWebLink> webLinks = await GetDocumentLinks(doc, ignoreRules, keywords);
             webLinks =
-                webLinks.Where(x => 
-                        !string.IsNullOrEmpty(x.Value) && knownLinks.All(kl => kl.Value.NotSameUri(x.Value, domain)) && 
+                webLinks.Where(x =>
+                        !string.IsNullOrEmpty(x.Value) && knownLinks.All(kl => kl.Value.NotSameUri(x.Value, domain)) &&
                         !x.Value.StartsWith("#"))
                     .GroupBy(x => x.Value)
                     .Select(x => x.First())
@@ -274,7 +284,7 @@ namespace UltimoScraper.Parsers
                     continue;
                 }
 
-                if(webLink.Value.StartsWith("mailto")) continue;
+                if (webLink.Value.StartsWith("mailto")) continue;
 
                 parsedPage.ChildPages.Add(await ParsePages(domain, webLink, knownLinks, ignoreRules, keywords, pagesPerKeyword, sessionName));
             }
