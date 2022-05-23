@@ -43,7 +43,7 @@ namespace UltimoScraper.Retrievers
                 if (!ignorePath.ToLower().StartsWith(disallow)) continue;
 
                 var ignoreRule = ignorePath.Substring(disallow.Length, ignorePath.Length - disallow.Length).Trim();
-                if (string.IsNullOrEmpty(ignoreRule)) continue;
+                if (string.IsNullOrEmpty(ignoreRule) || ignoreRule.Equals("/")) continue;
 
                 ignoreRules.Add(new IgnoreRule
                 {

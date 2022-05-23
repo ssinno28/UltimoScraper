@@ -76,7 +76,7 @@ namespace UltimoScraper.Parsers
                 sessionName = $"scrape-run-{DateTime.Now:O}";
             }
 
-            string[] extensionsToIgnore = { ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".svg" };
+            string[] extensionsToIgnore = { ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".mp4", ".avi", ".mov", ".mkv" };
             foreach (var ext in extensionsToIgnore)
             {
                 ignoreRules.Add(new IgnoreRule
@@ -198,54 +198,57 @@ namespace UltimoScraper.Parsers
                 return null;
             }
 
+            string urlWithScheme = uri.IsAbsoluteUri
+                    ? uri.AbsoluteUri
+                    : $"{domain.Scheme}://{domain.Authority}/{url}";
+
+            var doc = new HtmlDocument();
+
+            _throttleFunc(sessionName);
+
+            var browser = await _viewManager.GetBrowser(sessionName);
+            string decodedString = HttpUtility.HtmlDecode(urlWithScheme);
+
+            _logger.LogDebug($"Starting parse of {decodedString} for domain {domain}");
+
+            var pageTimeout = _scraperConfig.PageTimeout == 0 ? 5000 : _scraperConfig.PageTimeout;
+            var page = await browser.NewPageAsync();
+
             try
             {
-                string urlWithScheme = uri.IsAbsoluteUri
-                        ? uri.AbsoluteUri
-                        : $"{domain.Scheme}://{domain.Authority}/{url}";
-
-                var doc = new HtmlDocument();
-
-                _throttleFunc(sessionName);
-
-                var browser = await _viewManager.GetBrowser(sessionName);
-                string decodedString = HttpUtility.HtmlDecode(urlWithScheme);
-
-                _logger.LogDebug($"Starting parse of {decodedString} for domain {domain}");
-
-                var pageTimeout = _scraperConfig.PageTimeout == 0 ? 5000 : _scraperConfig.PageTimeout;
-                var page = await browser.NewPageAsync();
                 await page.GoToAsync(decodedString, pageTimeout, new[]
                 {
                     WaitUntilNavigation.DOMContentLoaded
                 });
-
-                var pageInteraction =
-                    _pageInteractions.FirstOrDefault(x => x.IsMatch(urlWithScheme));
-
-                if (pageInteraction != null)
-                {
-                    await pageInteraction.Interact(page);
-                }
-
-                string html = await page.EvaluateExpressionAsync<string>("document.documentElement.innerHTML");
-                html = _htmlThreaders.Aggregate(html, (current, htmlThreader) => htmlThreader.Thread(current));
-
-                doc.LoadHtml(html);
-
-                foreach (var htmlDocThreader in _htmlDocThreaders)
-                {
-                    doc = htmlDocThreader.Thread(doc);
-                }
-
-                _logger.LogDebug($"Finished parse of page {decodedString} for domain {domain}");
-                return doc;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Could not download page for url {url}");
+                _logger.LogError(ex, $"Could not go to page {decodedString}");
+                await page.DisposeAsync();
                 return null;
             }
+
+            var pageInteraction =
+                _pageInteractions.FirstOrDefault(x => x.IsMatch(urlWithScheme));
+
+            if (pageInteraction != null)
+            {
+                await pageInteraction.Interact(page);
+            }
+
+            string html = await page.EvaluateExpressionAsync<string>("document.documentElement.innerHTML");
+            html = _htmlThreaders.Aggregate(html, (current, htmlThreader) => htmlThreader.Thread(current));
+
+            doc.LoadHtml(html);
+
+            foreach (var htmlDocThreader in _htmlDocThreaders)
+            {
+                doc = htmlDocThreader.Thread(doc);
+            }
+
+            _logger.LogDebug($"Finished parse of page {decodedString} for domain {domain}");
+            await page.DisposeAsync();
+            return doc;
         }
 
         private async Task<ParsedPage> ParsePages(
