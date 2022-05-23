@@ -31,7 +31,7 @@ namespace UltimoScraper.Parsers
         private readonly IEnumerable<ILinkProcessor> _linkProcessors;
         private readonly IEnumerable<IPageInteraction> _pageInteractions;
         private readonly ILogger<DefaultWebParser> _logger;
-        private readonly IPageManager _viewManager;
+        private readonly IBrowserManager _viewManager;
         private readonly Action<string> _throttleFunc;
         private readonly ScraperConfig _scraperConfig;
 
@@ -44,7 +44,7 @@ namespace UltimoScraper.Parsers
             IEnumerable<ILinkProcessor> linkProcessors,
             IEnumerable<IPageInteraction> pageInteractions,
             ILogger<DefaultWebParser> logger,
-            IPageManager viewManager,
+            IBrowserManager viewManager,
             Action<string> throttleFunc,
             IOptions<ScraperConfig> scraperConfigOptions)
         {
@@ -198,12 +198,13 @@ namespace UltimoScraper.Parsers
 
                 _throttleFunc(sessionName);
 
-                var page = await _viewManager.GetPage(sessionName);
+                var browser = await _viewManager.GetBrowser(sessionName);
                 string decodedString = HttpUtility.HtmlDecode(urlWithScheme);
 
                 _logger.LogDebug($"Starting parse of {decodedString} for domain {domain}");
 
                 var pageTimeout = _scraperConfig.PageTimeout == 0 ? 5000 : _scraperConfig.PageTimeout;
+                var page = await browser.NewPageAsync();
                 await page.GoToAsync(decodedString, pageTimeout, new[]
                 {
                     WaitUntilNavigation.DOMContentLoaded

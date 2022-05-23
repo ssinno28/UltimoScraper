@@ -45,7 +45,7 @@ namespace UltimoScraper.Helpers
             serviceCollection.AddScoped<IListRetriever, DefaultListRetriever>();
             serviceCollection.AddScoped<IRobotsTxtRetriever, RobotsTxtRetriever>();
             serviceCollection.AddScoped<IHttpClientProvider, HttpClientProvider>();
-            serviceCollection.AddSingleton<IPageManager, PageManager>();
+            serviceCollection.AddSingleton<IBrowserManager, BrowserManager>();
             serviceCollection.AddSingleton<IStopWatchManager, StopWatchManager>();
             serviceCollection.Configure<ScraperConfig>(config =>
             {
