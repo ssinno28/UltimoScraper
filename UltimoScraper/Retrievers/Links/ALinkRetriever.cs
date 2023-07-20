@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -17,20 +18,31 @@ namespace UltimoScraper.Retrievers.Links
         }
 
         protected async Task<IList<ParsedWebLink>> ProcessLinks(
-            IEnumerable<ParsedWebLink> webLinks, 
+            IEnumerable<ParsedWebLink> webLinks,
             IList<IgnoreRule> linkIgnoreRules,
             IList<string> keywords)
         {
-            if(!webLinks.Any()) return new List<ParsedWebLink>();
+            if (!webLinks.Any()) return new List<ParsedWebLink>();
 
             IList<ParsedWebLink> parsedWebLinks = new List<ParsedWebLink>();
             foreach (var linkProcessor in _linkProcessors)
             {
                 foreach (var webLink in webLinks)
                 {
-                    if (!await linkProcessor.Process(webLink, keywords) ||
-                        linkIgnoreRules.Any(x => Regex.Match(webLink.Value, x.Rule).Success) ||
-                        linkIgnoreRules.Any(x => Regex.Match(webLink.Text, x.Rule).Success)) continue;
+                    bool ignoreLink = false;
+                    bool ignoreText = false;
+
+                    try
+                    {
+                        ignoreLink = linkIgnoreRules.Any(x => Regex.Match(webLink.Value, x.Rule).Success);
+                        ignoreText = linkIgnoreRules.Any(x => Regex.Match(webLink.Text, x.Rule).Success);
+                    }
+                    catch (Exception ex)
+                    {
+                        // swallow for now;
+                    }
+
+                    if (!await linkProcessor.Process(webLink, keywords) || ignoreLink || ignoreText) continue;
 
                     parsedWebLinks.Add(webLink);
                 }
