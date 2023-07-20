@@ -287,7 +287,7 @@ namespace UltimoScraper.Parsers
                     continue;
                 }
 
-                if (webLink.Value.StartsWith("mailto")) continue;
+                if (webLink.Value.StartsWith("mailto") || webLink.Value.StartsWith("webcal")) continue;
 
                 parsedPage.ChildPages.Add(await ParsePages(domain, webLink, knownLinks, ignoreRules, keywords, pagesPerKeyword, sessionName));
             }

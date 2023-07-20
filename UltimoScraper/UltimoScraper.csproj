@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <Version>1.0.42</Version>
+    <Version>1.0.43</Version>
     <RepositoryUrl>https://github.com/ssinno28/WebScraper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Description>WebScraper built in c# and allows for plug and play modifications.</Description>
