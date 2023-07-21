@@ -102,6 +102,7 @@ namespace UltimoScraper.Parsers
             string domain,
             IList<IgnoreRule> ignoreRules,
             IList<string> keywords,
+            IList<string> searchKeywords,
             string sessionName = null)
         {
             ignoreRules.AddDefaultIgnoreRules();
@@ -121,6 +122,7 @@ namespace UltimoScraper.Parsers
                 knownLinks,
                 ignoreRules,
                 keywords,
+                searchKeywords,
                 sessionName
             );
         }
@@ -358,12 +360,17 @@ namespace UltimoScraper.Parsers
             List<ParsedWebLink> knownLinks,
             IList<IgnoreRule> ignoreRules,
             IList<string> keywords,
+            IList<string> searchKeywords,
             string sessionName)
         {
             HtmlDocument doc = await GetPageHtml(domain, linkToPage.Value, sessionName);
             if (doc == null) return null;
 
-            List<ParsedWebLink> webLinks = await GetDocumentLinks(doc, ignoreRules, keywords);
+            var linkKeywords = new List<string>();
+            linkKeywords.AddRange(keywords);
+            linkKeywords.AddRange(searchKeywords);
+
+            List<ParsedWebLink> webLinks = await GetDocumentLinks(doc, ignoreRules, linkKeywords);
             webLinks =
                 webLinks.Where(x =>
                         !string.IsNullOrEmpty(x.Value) && knownLinks.All(kl => kl.Value.NotSameUri(x.Value, domain)) &&
@@ -426,7 +433,7 @@ namespace UltimoScraper.Parsers
                     continue;
                 }
 
-                matchedKeywords.AddRange(await FindKeywords(domain, webLink, knownLinks, ignoreRules, keywords, sessionName));
+                matchedKeywords.AddRange(await FindKeywords(domain, webLink, knownLinks, ignoreRules, keywords, searchKeywords, sessionName));
             }
 
             return matchedKeywords;

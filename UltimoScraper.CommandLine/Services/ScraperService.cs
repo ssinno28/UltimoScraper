@@ -32,7 +32,7 @@ namespace UltimoScraper.CommandLine.Services
         public async Task<IList<string>> KeywordSearch(string domain, string[] keywords)
         {
             var ignoreRules = await _robotsTxtRetriever.GetRobotsTxt(new Uri(domain));
-            return await _webParser.KeywordSearch(domain, ignoreRules, keywords.ToList());
+            return await _webParser.KeywordSearch(domain, ignoreRules, keywords.ToList(), new List<string>());
         }
 
         public async Task ScrapePage(string domain, string path, string[] keywords)
