@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using UltimoScraper.Dictionary;
@@ -26,6 +27,12 @@ namespace UltimoScraper.CommandLine.Services
         {
             var ignoreRules = await _robotsTxtRetriever.GetRobotsTxt(new Uri(domain));
             var result = await _webParser.ParseSite(domain, ignoreRules, keywords);
+        }
+        
+        public async Task<IList<string>> KeywordSearch(string domain, string[] keywords)
+        {
+            var ignoreRules = await _robotsTxtRetriever.GetRobotsTxt(new Uri(domain));
+            return await _webParser.KeywordSearch(domain, ignoreRules, keywords.ToList());
         }
 
         public async Task ScrapePage(string domain, string path, string[] keywords)

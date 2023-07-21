@@ -12,6 +12,12 @@ namespace UltimoScraper.Interfaces
             IList<IgnoreRule> ignoreRules, 
             IList<string> keywords,
             string sessionName = null);
+
+        Task<IList<string>> KeywordSearch(
+            string domain,
+            IList<IgnoreRule> ignoreRules,
+            IList<string> keywords,
+            string sessionName = null);
         Task<ParsedPage> ParsePage(string domain, string path, IList<IgnoreRule> ignoreRules, IList<string> keywords, string sessionName = null);
     }
 }

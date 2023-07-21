@@ -76,16 +76,7 @@ namespace UltimoScraper.Parsers
                 sessionName = $"scrape-run-{DateTime.Now:O}";
             }
 
-            string[] extensionsToIgnore = { ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".mp4", ".avi", ".mov", ".mkv" };
-            foreach (var ext in extensionsToIgnore)
-            {
-                ignoreRules.Add(new IgnoreRule
-                {
-                    IgnoreRuleType = IgnoreRuleType.Link,
-                    Rule = ext
-                });
-            }
-
+            ignoreRules.AddDefaultIgnoreRules();
             var parsedPages =
                 await ParsePages(
                     new Uri(domain),
@@ -105,6 +96,33 @@ namespace UltimoScraper.Parsers
                 TwitterLink = await GetTwitterLink(knownLinks),
                 PagesPerKeyword = pagesPerKeyword
             };
+        }
+
+        public async Task<IList<string>> KeywordSearch(
+            string domain,
+            IList<IgnoreRule> ignoreRules,
+            IList<string> keywords,
+            string sessionName = null)
+        {
+            ignoreRules.AddDefaultIgnoreRules();
+
+            var siteLink = new ParsedWebLink { Value = domain };
+            var knownLinks = new List<ParsedWebLink>();
+            var pagesPerKeyword = new Dictionary<string, IList<ParsedPage>>();
+
+            if (string.IsNullOrEmpty(sessionName))
+            {
+                sessionName = $"scrape-run-{DateTime.Now:O}";
+            }
+
+            return await FindKeywords(
+                new Uri(domain),
+                siteLink,
+                knownLinks,
+                ignoreRules,
+                keywords,
+                sessionName
+            );
         }
 
         private async Task<ParsedWebLink> GetFacebookLink(IList<ParsedWebLink> knownLinks)
@@ -327,6 +345,86 @@ namespace UltimoScraper.Parsers
             parsedPage.LinkToPage = linkToPage;
 
             return parsedPage;
+        }
+
+        private async Task<IList<string>> FindKeywords(
+            Uri domain,
+            ParsedWebLink linkToPage,
+            List<ParsedWebLink> knownLinks,
+            IList<IgnoreRule> ignoreRules,
+            IList<string> keywords,
+            string sessionName)
+        {
+            HtmlDocument doc = await GetPageHtml(domain, linkToPage.Value, sessionName);
+            if (doc == null) return null;
+
+            List<ParsedWebLink> webLinks = await GetDocumentLinks(doc, ignoreRules, keywords);
+            webLinks =
+                webLinks.Where(x =>
+                        !string.IsNullOrEmpty(x.Value) && knownLinks.All(kl => kl.Value.NotSameUri(x.Value, domain)) &&
+                        !x.Value.StartsWith("#"))
+                    .GroupBy(x => x.Value)
+                    .Select(x => x.First())
+                    .ToList();
+
+            lock (_thisLock)
+            {
+                knownLinks.AddRange(webLinks);
+            }
+
+            var matchedKeywords =
+                webLinks
+                    .SelectMany(x => x.MatchedKeywords)
+                    .Distinct()
+                    .ToList();
+
+            var bodyHtmlNode = doc.DocumentNode.QuerySelector("body");
+            string text =
+                bodyHtmlNode != null
+                ? bodyHtmlNode.InnerText.ToLower()
+                : String.Empty;
+
+            foreach (var keyword in keywords)
+            {
+                if (!text.Contains(keyword.ToLower()))
+                {
+                    continue;
+                }
+
+                if (!matchedKeywords.Any(x => x.Equals(keyword.ToLower())))
+                {
+                    matchedKeywords.Add(keyword.ToLower());
+                }
+            }
+
+            foreach (var matchedKeyword in matchedKeywords)
+            {
+                _logger.LogInformation($"Keyword {matchedKeyword} has been matched!");
+                keywords.Remove(matchedKeyword);
+            }
+
+            var ignoreLinks = new List<string>() { "instagram", "facebook", "twitter" };
+            foreach (var webLink in webLinks)
+            {
+                if (!webLink.Value.IsSiteDomain(domain))
+                {
+                    continue;
+                }
+
+                if (ignoreLinks.Any(x => webLink.Value.Contains(x)))
+                {
+                    continue;
+                }
+
+                if (matchedKeywords.Intersect(webLink.MatchedKeywords).Any())
+                {
+                    continue;
+                }
+
+                matchedKeywords.AddRange(await FindKeywords(domain, webLink, knownLinks, ignoreRules, keywords, sessionName));
+            }
+
+            return matchedKeywords;
         }
     }
 }

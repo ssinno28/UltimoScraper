@@ -19,6 +19,7 @@ namespace UltimoScraper.CommandLine
             string domain = args.ToList().GetArgument("--Domain");
             string path = args.ToList().GetArgument("--Path");
             string keywords = args.ToList().GetArgument("--Keywords");
+            string keywordSearch = args.ToList().GetArgument("--KeywordSearch");
 
             if (!args.Any())
             {
@@ -34,6 +35,7 @@ namespace UltimoScraper.CommandLine
                         domain = inputArgs.GetArgument("--Domain");
                         path = inputArgs.GetArgument("--Path");
                         keywords = inputArgs.GetArgument("--Keywords");
+                        keywordSearch = inputArgs.GetArgument("--KeywordSearch");
 
                         quitNow = true;
                     }
@@ -45,7 +47,11 @@ namespace UltimoScraper.CommandLine
                 }
             }
 
-            MainAsync(GetContainer(), domain, path, !string.IsNullOrEmpty(keywords) ? keywords.Split(',') : new string[] { }).Wait();
+            MainAsync(GetContainer(), domain, path,
+                !string.IsNullOrEmpty(keywords)
+                    ? keywords.Split(',')
+                    : new string[] { },
+                keywordSearch == "true").Wait();
         }
 
         static IServiceProvider GetContainer()
@@ -83,9 +89,17 @@ namespace UltimoScraper.CommandLine
             return serviceCollection.BuildServiceProvider();
         }
 
-        static async Task MainAsync(IServiceProvider container, string domain, string path, string[] keywords)
+        static async Task MainAsync(IServiceProvider container, string domain, string path, string[] keywords, bool keywordSearch = false)
         {
             var scraperService = container.GetService<IScraperService>();
+
+            if (keywordSearch)
+            {
+                Console.WriteLine($"scraping site for site id: {domain}");
+                var matchedKeywords = await scraperService.KeywordSearch(domain, keywords);
+                Console.WriteLine($"Matched keywords: {string.Join(",", matchedKeywords)}");
+                return;
+            }
 
             if (!string.IsNullOrEmpty(domain))
             {
