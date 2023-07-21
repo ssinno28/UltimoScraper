@@ -238,6 +238,28 @@ namespace UltimoScraper.Parsers
                 {
                     WaitUntilNavigation.DOMContentLoaded
                 });
+
+                var pageInteraction =
+                    _pageInteractions.FirstOrDefault(x => x.IsMatch(urlWithScheme));
+
+                if (pageInteraction != null)
+                {
+                    await pageInteraction.Interact(page);
+                }
+
+                string html = await page.EvaluateExpressionAsync<string>("document.documentElement.innerHTML");
+                html = _htmlThreaders.Aggregate(html, (current, htmlThreader) => htmlThreader.Thread(current));
+
+                doc.LoadHtml(html);
+
+                foreach (var htmlDocThreader in _htmlDocThreaders)
+                {
+                    doc = htmlDocThreader.Thread(doc);
+                }
+
+                _logger.LogDebug($"Finished parse of page {decodedString} for domain {domain}");
+                await page.DisposeAsync();
+                return doc;
             }
             catch (Exception ex)
             {
@@ -245,28 +267,6 @@ namespace UltimoScraper.Parsers
                 await page.DisposeAsync();
                 return null;
             }
-
-            var pageInteraction =
-                _pageInteractions.FirstOrDefault(x => x.IsMatch(urlWithScheme));
-
-            if (pageInteraction != null)
-            {
-                await pageInteraction.Interact(page);
-            }
-
-            string html = await page.EvaluateExpressionAsync<string>("document.documentElement.innerHTML");
-            html = _htmlThreaders.Aggregate(html, (current, htmlThreader) => htmlThreader.Thread(current));
-
-            doc.LoadHtml(html);
-
-            foreach (var htmlDocThreader in _htmlDocThreaders)
-            {
-                doc = htmlDocThreader.Thread(doc);
-            }
-
-            _logger.LogDebug($"Finished parse of page {decodedString} for domain {domain}");
-            await page.DisposeAsync();
-            return doc;
         }
 
         private async Task<ParsedPage> ParsePages(
