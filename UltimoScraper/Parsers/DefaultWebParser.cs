@@ -305,7 +305,12 @@ namespace UltimoScraper.Parsers
                     continue;
                 }
 
-                if (webLink.Value.StartsWith("mailto") || webLink.Value.StartsWith("webcal")) continue;
+                if (webLink.Value.StartsWith("mailto") ||
+                    webLink.Value.StartsWith("webcal") ||
+                    webLink.Value.Contains("twitter") ||
+                    webLink.Value.Contains("instagram") ||
+                    webLink.Value.Contains("facebook")
+                    ) continue;
 
                 parsedPage.ChildPages.Add(await ParsePages(domain, webLink, knownLinks, ignoreRules, keywords, pagesPerKeyword, sessionName));
             }
