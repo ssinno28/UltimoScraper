@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PuppeteerSharp;
 using UltimoScraper.Interfaces;
 using UltimoScraper.Interfaces.Threaders;
@@ -26,7 +27,7 @@ public class HtmlFetcher : IHtmlFetcher
     public HtmlFetcher(ILogger<HtmlFetcher> logger, 
         IBrowserManager viewManager, 
         Action<string> throttleFunc, 
-        ScraperConfig scraperConfig, 
+        IOptions<ScraperConfig> scraperConfig, 
         IEnumerable<IHtmlThreader> htmlThreaders, 
         IEnumerable<IHtmlDocThreader> htmlDocThreaders, 
         IEnumerable<IPageInteraction> pageInteractions)
@@ -34,7 +35,7 @@ public class HtmlFetcher : IHtmlFetcher
         _logger = logger;
         _viewManager = viewManager;
         _throttleFunc = throttleFunc;
-        _scraperConfig = scraperConfig;
+        _scraperConfig = scraperConfig.Value;
         _htmlThreaders = htmlThreaders;
         _htmlDocThreaders = htmlDocThreaders;
         _pageInteractions = pageInteractions;
