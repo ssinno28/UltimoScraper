@@ -8,7 +8,7 @@ namespace UltimoScraper.Processors.LinkProcessors
 {
     public class FacebookLinkProcessor : ILinkProcessor
     {
-        public async Task<bool> Process(ParsedWebLink webLink, IList<string> keywords)
+        public async Task<bool> Process(ParsedWebLink webLink, IList<Keyword> keywords)
         {
             var match = Regex.Match(webLink.Value, @"(?:(?:http|https):\/\/)?(?:www.)?facebook.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[?\w\-]*\/)?(?:profile.php\?id=(?=\d.*))?([\w\-]*)?");
             return match.Success;

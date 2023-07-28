@@ -20,7 +20,7 @@ namespace UltimoScraper.Retrievers.Links
         public async Task<IList<ParsedWebLink>> GetLinks(
             HtmlNode htmlNode, 
             IList<IgnoreRule> linkIgnoreRules,
-            IList<string> keywords)
+            IList<Keyword> keywords)
         {
             var links =
                 htmlNode.QuerySelectorAll("a")

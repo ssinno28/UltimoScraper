@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Web;
+using UltimoScraper.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace UltimoScraper.Helpers
 {
@@ -19,6 +23,21 @@ namespace UltimoScraper.Helpers
             var decodedValue = HttpUtility.HtmlDecode(value);
             var match = Regex.Match(decodedValue, @"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?");
             return match.Value;
+        }
+
+        public static bool MatchesKeyword(this string input, Keyword keyword)
+        {
+            input = input.ToLower();
+
+            string pattern = $@"\b{Regex.Escape(keyword.Value.ToLower())}\b";
+            if (!string.IsNullOrEmpty(keyword.Regex))
+            {
+                pattern = keyword.Regex;
+            }
+            
+            var match = Regex.Match(input, pattern);
+
+            return match.Success;
         }
 
         public static bool IsSiteDomain(this string url, Uri domain)

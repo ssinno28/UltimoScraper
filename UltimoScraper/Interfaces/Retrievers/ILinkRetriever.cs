@@ -10,6 +10,6 @@ namespace UltimoScraper.Interfaces.Retrievers
         Task<IList<ParsedWebLink>> GetLinks(
             HtmlNode url, 
             IList<IgnoreRule> linkIgnoreRules,
-            IList<string> keywords);
+            IList<Keyword> keywords);
     }
 }

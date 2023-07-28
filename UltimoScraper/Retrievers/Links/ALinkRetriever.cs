@@ -20,7 +20,7 @@ namespace UltimoScraper.Retrievers.Links
         protected async Task<IList<ParsedWebLink>> ProcessLinks(
             IEnumerable<ParsedWebLink> webLinks,
             IList<IgnoreRule> linkIgnoreRules,
-            IList<string> keywords)
+            IList<Keyword> keywords)
         {
             if (!webLinks.Any()) return new List<ParsedWebLink>();
 

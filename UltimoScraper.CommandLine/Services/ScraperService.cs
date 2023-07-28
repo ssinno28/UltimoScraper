@@ -26,18 +26,18 @@ namespace UltimoScraper.CommandLine.Services
         public async Task ScrapeSite(string domain, string[] keywords)
         {
             var ignoreRules = await _robotsTxtRetriever.GetRobotsTxt(new Uri(domain));
-            var result = await _webParser.ParseSite(domain, ignoreRules, keywords);
+            var result = await _webParser.ParseSite(domain, ignoreRules, keywords.Select(x => new Keyword() { Value = x }).ToList());
         }
-        
+
         public async Task<IList<string>> KeywordSearch(string domain, string[] keywords)
         {
             var ignoreRules = await _robotsTxtRetriever.GetRobotsTxt(new Uri(domain));
-            return await _webParser.KeywordSearch(domain, ignoreRules, keywords.ToList(), new List<string>());
+            return await _webParser.KeywordSearch(domain, ignoreRules, keywords.Select(x => new Keyword() { Value = x }).ToList(), new List<Keyword>());
         }
 
         public async Task ScrapePage(string domain, string path, string[] keywords)
         {
-            var parsedPageDto = await _webParser.ParsePage(domain, path, _ignoreRules, keywords);
+            var parsedPageDto = await _webParser.ParsePage(domain, path, _ignoreRules, keywords.Select(x => new Keyword() { Value = x }).ToList());
         }
     }
 }

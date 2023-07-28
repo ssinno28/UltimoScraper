@@ -4,6 +4,7 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using UltimoScraper.Fetchers;
 using UltimoScraper.Interfaces;
 using UltimoScraper.Interfaces.Processors;
 using UltimoScraper.Interfaces.Retrievers;
@@ -42,6 +43,7 @@ namespace UltimoScraper.Helpers
         public static IServiceCollection AddWebScraper(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
             serviceCollection.AddScoped<IWebParser, DefaultWebParser>();
+            serviceCollection.AddScoped<IHtmlFetcher, HtmlFetcher>();
             serviceCollection.AddScoped<IListRetriever, DefaultListRetriever>();
             serviceCollection.AddScoped<IRobotsTxtRetriever, RobotsTxtRetriever>();
             serviceCollection.AddScoped<IHttpClientProvider, HttpClientProvider>();

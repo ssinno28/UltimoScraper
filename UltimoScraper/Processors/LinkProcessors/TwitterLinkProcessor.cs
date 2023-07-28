@@ -8,7 +8,7 @@ namespace UltimoScraper.Processors.LinkProcessors
 {
     public class TwitterLinkProcessor : ILinkProcessor
     {
-        public async Task<bool> Process(ParsedWebLink webLink, IList<string> keywords)
+        public async Task<bool> Process(ParsedWebLink webLink, IList<Keyword> keywords)
         {
             var match = Regex.Match(webLink.Value, @"(?:(?:http|https):\/\/)?(?:www.)?twitter.com\/(?:(?:\w)*#!\/)?");
             return match.Success;

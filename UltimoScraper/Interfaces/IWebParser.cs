@@ -10,15 +10,15 @@ namespace UltimoScraper.Interfaces
         Task<ParsedSite> ParseSite(
             string domain, 
             IList<IgnoreRule> ignoreRules, 
-            IList<string> keywords,
+            IList<Keyword> keywords,
             string sessionName = null);
 
         Task<IList<string>> KeywordSearch(
             string domain,
             IList<IgnoreRule> ignoreRules,
-            IList<string> keywords,
-            IList<string> searchKeywords,
+            IList<Keyword> keywords,
+            IList<Keyword> searchKeywords,
             string sessionName = null);
-        Task<ParsedPage> ParsePage(string domain, string path, IList<IgnoreRule> ignoreRules, IList<string> keywords, string sessionName = null);
+        Task<ParsedPage> ParsePage(string domain, string path, IList<IgnoreRule> ignoreRules, IList<Keyword> keywords, string sessionName = null);
     }
 }

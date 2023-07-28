@@ -40,10 +40,10 @@ namespace UltimoScraper.Tests
                 Text = "Twitter",
                 Value = "https://twitter.com/TestSite"
             };
-            var result = await twitterLinkProcessor.Process(twitterLink, new List<string>());
+            var result = await twitterLinkProcessor.Process(twitterLink, new List<Keyword>());
             Assert.IsTrue(result);
         }
-        
+
         [Test]
         public async Task TestFacebookLinkProcessor()
         {
@@ -58,10 +58,10 @@ namespace UltimoScraper.Tests
                 Value = "https://www.facebook.com/FakeSite/"
             };
 
-            var result = await facebookLinkProcessor.Process(facebookLink, new List<string>());
+            var result = await facebookLinkProcessor.Process(facebookLink, new List<Keyword>());
             Assert.IsTrue(result);
         }
-        
+
         [Test]
         public async Task TestInstagramLinkProcessor()
         {
@@ -76,7 +76,7 @@ namespace UltimoScraper.Tests
                 Value = "https://www.instagram.com/Fake_Site/"
             };
 
-            var result = await instagramLinkProcessor.Process(instagramLink, new List<string>());
+            var result = await instagramLinkProcessor.Process(instagramLink, new List<Keyword>());
             Assert.IsTrue(result);
         }
     }

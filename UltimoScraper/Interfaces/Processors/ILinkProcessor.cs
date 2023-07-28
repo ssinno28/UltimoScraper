@@ -6,6 +6,6 @@ namespace UltimoScraper.Interfaces.Processors
 {
     public interface ILinkProcessor
     {
-        Task<bool> Process(ParsedWebLink webLink, IList<string> keywords);
+        Task<bool> Process(ParsedWebLink webLink, IList<Keyword> keywords);
     }
 }

@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Fizzler.Systems.HtmlAgilityPack;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using PuppeteerSharp;
 using UltimoScraper.Dictionary;
 using UltimoScraper.Helpers;
 using UltimoScraper.Interfaces;
 using UltimoScraper.Interfaces.Processors;
 using UltimoScraper.Interfaces.Retrievers;
-using UltimoScraper.Interfaces.Threaders;
 using UltimoScraper.Models;
 using UltimoScraper.Processors.LinkProcessors;
 
@@ -24,47 +20,29 @@ namespace UltimoScraper.Parsers
         private readonly object _thisLock = new object();
 
         private readonly IEnumerable<ILinkRetriever> _linkRetrievers;
-        private readonly IListRetriever _listRetriever;
-        private readonly IEnumerable<IHtmlThreader> _htmlThreaders;
-        private readonly IEnumerable<IHtmlDocThreader> _htmlDocThreaders;
         private readonly IEnumerable<ITitleRetriever> _titleRetrievers;
         private readonly IEnumerable<ILinkProcessor> _linkProcessors;
-        private readonly IEnumerable<IPageInteraction> _pageInteractions;
         private readonly ILogger<DefaultWebParser> _logger;
-        private readonly IBrowserManager _viewManager;
-        private readonly Action<string> _throttleFunc;
-        private readonly ScraperConfig _scraperConfig;
+        private readonly IHtmlFetcher _htmlFetcher;
 
         public DefaultWebParser(
             IEnumerable<ILinkRetriever> linkRetrievers,
-            IListRetriever listRetriever,
-            IEnumerable<IHtmlThreader> htmlThreaders,
             IEnumerable<ITitleRetriever> titleRetrievers,
-            IEnumerable<IHtmlDocThreader> htmlDocThreaders,
             IEnumerable<ILinkProcessor> linkProcessors,
-            IEnumerable<IPageInteraction> pageInteractions,
             ILogger<DefaultWebParser> logger,
-            IBrowserManager viewManager,
-            Action<string> throttleFunc,
-            IOptions<ScraperConfig> scraperConfigOptions)
+            IHtmlFetcher htmlFetcher)
         {
             _linkRetrievers = linkRetrievers;
-            _listRetriever = listRetriever;
-            _htmlThreaders = htmlThreaders;
             _titleRetrievers = titleRetrievers;
-            _htmlDocThreaders = htmlDocThreaders;
             _linkProcessors = linkProcessors;
-            _pageInteractions = pageInteractions;
             _logger = logger;
-            _viewManager = viewManager;
-            _throttleFunc = throttleFunc;
-            _scraperConfig = scraperConfigOptions.Value;
+            _htmlFetcher = htmlFetcher;
         }
 
         public async Task<ParsedSite> ParseSite(
             string domain,
             IList<IgnoreRule> ignoreRules,
-            IList<string> keywords,
+            IList<Keyword> keywords,
             string sessionName = null)
         {
             var siteLink = new ParsedWebLink { Value = domain };
@@ -101,15 +79,14 @@ namespace UltimoScraper.Parsers
         public async Task<IList<string>> KeywordSearch(
             string domain,
             IList<IgnoreRule> ignoreRules,
-            IList<string> keywords,
-            IList<string> searchKeywords,
+            IList<Keyword> keywords,
+            IList<Keyword> searchKeywords,
             string sessionName = null)
         {
             ignoreRules.AddDefaultIgnoreRules();
 
             var siteLink = new ParsedWebLink { Value = domain };
             var knownLinks = new List<ParsedWebLink>();
-            var pagesPerKeyword = new Dictionary<string, IList<ParsedPage>>();
 
             if (string.IsNullOrEmpty(sessionName))
             {
@@ -132,7 +109,7 @@ namespace UltimoScraper.Parsers
             var linkProcessor = _linkProcessors.First(x => x.GetType() == typeof(FacebookLinkProcessor));
             foreach (var parsedWebLink in knownLinks)
             {
-                if (await linkProcessor.Process(parsedWebLink, new List<string>())) return parsedWebLink;
+                if (await linkProcessor.Process(parsedWebLink, new List<Keyword>())) return parsedWebLink;
             }
 
             return null;
@@ -143,7 +120,7 @@ namespace UltimoScraper.Parsers
             var linkProcessor = _linkProcessors.First(x => x.GetType() == typeof(InstagramLinkProcessor));
             foreach (var parsedWebLink in knownLinks)
             {
-                if (await linkProcessor.Process(parsedWebLink, new List<string>())) return parsedWebLink;
+                if (await linkProcessor.Process(parsedWebLink, new List<Keyword>())) return parsedWebLink;
             }
 
             return null;
@@ -154,18 +131,18 @@ namespace UltimoScraper.Parsers
             var linkProcessor = _linkProcessors.First(x => x.GetType() == typeof(TwitterLinkProcessor));
             foreach (var parsedWebLink in knownLinks)
             {
-                if (await linkProcessor.Process(parsedWebLink, new List<string>())) return parsedWebLink;
+                if (await linkProcessor.Process(parsedWebLink, new List<Keyword>())) return parsedWebLink;
             }
 
             return null;
         }
 
-        public async Task<ParsedPage> ParsePage(string domain, string path, IList<IgnoreRule> ignoreRules, IList<string> keywords, string sessionName = null)
+        public async Task<ParsedPage> ParsePage(string domain, string path, IList<IgnoreRule> ignoreRules, IList<Keyword> keywords, string sessionName = null)
         {
             sessionName =
                 string.IsNullOrEmpty(sessionName) ? $"scrape-run-{DateTime.Now:O}" : sessionName;
 
-            HtmlDocument doc = await GetPageHtml(new Uri(domain), path, sessionName);
+            HtmlDocument doc = await _htmlFetcher.GetPageHtml(new Uri(domain), path, sessionName);
             if (doc == null) return null;
 
             var bodyHtmlNode = doc.DocumentNode.QuerySelector("body");
@@ -195,7 +172,7 @@ namespace UltimoScraper.Parsers
             return title;
         }
 
-        private async Task<List<ParsedWebLink>> GetDocumentLinks(HtmlDocument doc, IList<IgnoreRule> ignoreRules, IList<string> keywords)
+        private async Task<List<ParsedWebLink>> GetDocumentLinks(HtmlDocument doc, IList<IgnoreRule> ignoreRules, IList<Keyword> keywords)
         {
             var linkIgnoreRules =
                 ignoreRules.Where(x => x.IgnoreRuleType == IgnoreRuleType.Link)
@@ -210,78 +187,17 @@ namespace UltimoScraper.Parsers
             return webLinks;
         }
 
-        private async Task<HtmlDocument> GetPageHtml(Uri domain, string url, string sessionName)
-        {
-            var uriCreated = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
-            if (!uriCreated)
-            {
-                return null;
-            }
-
-            string urlWithScheme = uri.IsAbsoluteUri
-                    ? uri.AbsoluteUri
-                    : $"{domain.Scheme}://{domain.Authority}/{url}";
-
-            var doc = new HtmlDocument();
-
-            _throttleFunc(sessionName);
-
-            var browser = await _viewManager.GetBrowser(sessionName);
-            string decodedString = HttpUtility.HtmlDecode(urlWithScheme);
-
-            _logger.LogDebug($"Starting parse of {decodedString} for domain {domain}");
-
-            var pageTimeout = _scraperConfig.PageTimeout == 0 ? 5000 : _scraperConfig.PageTimeout;
-            var page = await browser.NewPageAsync();
-
-            try
-            {
-                await page.GoToAsync(decodedString, pageTimeout, new[]
-                {
-                    WaitUntilNavigation.DOMContentLoaded
-                });
-
-                var pageInteraction =
-                    _pageInteractions.FirstOrDefault(x => x.IsMatch(urlWithScheme));
-
-                if (pageInteraction != null)
-                {
-                    await pageInteraction.Interact(page);
-                }
-
-                string html = await page.EvaluateExpressionAsync<string>("document.documentElement.innerHTML");
-                html = _htmlThreaders.Aggregate(html, (current, htmlThreader) => htmlThreader.Thread(current));
-
-                doc.LoadHtml(html);
-
-                foreach (var htmlDocThreader in _htmlDocThreaders)
-                {
-                    doc = htmlDocThreader.Thread(doc);
-                }
-
-                _logger.LogDebug($"Finished parse of page {decodedString} for domain {domain}");
-                await page.DisposeAsync();
-                return doc;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Could not go to page {decodedString}");
-                await page.DisposeAsync();
-                return null;
-            }
-        }
-
         private async Task<ParsedPage> ParsePages(
             Uri domain,
             ParsedWebLink linkToPage,
             List<ParsedWebLink> knownLinks,
             IList<IgnoreRule> ignoreRules,
-            IList<string> keywords,
+            IList<Keyword> keywords,
             IDictionary<string, IList<ParsedPage>> pagesPerKeyword,
             string sessionName)
         {
 
-            HtmlDocument doc = await GetPageHtml(domain, linkToPage.Value, sessionName);
+            HtmlDocument doc = await _htmlFetcher.GetPageHtml(domain, linkToPage.Value, sessionName);
             if (doc == null) return null;
 
             ParsedPage parsedPage = new ParsedPage { ChildPages = new List<ParsedPage>() };
@@ -328,19 +244,19 @@ namespace UltimoScraper.Parsers
             List<string> matchedKeywords = new List<string>();
             foreach (var keyword in keywords)
             {
-                if (!text.Contains(keyword.ToLower()))
+                if (!text.MatchesKeyword(keyword))
                 {
                     continue;
                 }
 
-                matchedKeywords.Add(keyword.ToLower());
-                if (pagesPerKeyword.TryGetValue(keyword, out var matchedPages))
+                matchedKeywords.Add(keyword.Value.ToLower());
+                if (pagesPerKeyword.TryGetValue(keyword.Value, out var matchedPages))
                 {
                     matchedPages.Add(parsedPage);
                 }
                 else
                 {
-                    pagesPerKeyword.Add(keyword, new List<ParsedPage> { parsedPage });
+                    pagesPerKeyword.Add(keyword.Value, new List<ParsedPage> { parsedPage });
                 }
             }
 
@@ -359,14 +275,14 @@ namespace UltimoScraper.Parsers
             ParsedWebLink linkToPage,
             List<ParsedWebLink> knownLinks,
             IList<IgnoreRule> ignoreRules,
-            IList<string> keywords,
-            IList<string> searchKeywords,
+            IList<Keyword> keywords,
+            IList<Keyword> searchKeywords,
             string sessionName)
         {
-            HtmlDocument doc = await GetPageHtml(domain, linkToPage.Value, sessionName);
+            HtmlDocument doc = await _htmlFetcher.GetPageHtml(domain, linkToPage.Value, sessionName);
             if (doc == null) return null;
 
-            var linkKeywords = new List<string>();
+            var linkKeywords = new List<Keyword>();
             linkKeywords.AddRange(keywords);
             linkKeywords.AddRange(searchKeywords);
 
@@ -398,21 +314,21 @@ namespace UltimoScraper.Parsers
 
             foreach (var keyword in keywords)
             {
-                if (!text.Contains(keyword.ToLower()))
+                if (!text.MatchesKeyword(keyword))
                 {
                     continue;
                 }
 
-                if (!matchedKeywords.Any(x => x.Equals(keyword.ToLower())))
+                if (!matchedKeywords.Any(x => x.Equals(keyword.Value.ToLower())))
                 {
-                    matchedKeywords.Add(keyword.ToLower());
+                    matchedKeywords.Add(keyword.Value.ToLower());
                 }
             }
 
             foreach (var matchedKeyword in matchedKeywords)
             {
                 _logger.LogInformation($"Keyword {matchedKeyword} has been matched!");
-                keywords.Remove(matchedKeyword);
+                ((List<Keyword>)keywords).RemoveAll(x => x.Value.Equals(matchedKeyword));
             }
 
             var ignoreLinks = new List<string>() { "instagram", "facebook", "twitter" };
