@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using PuppeteerSharp;
 using UltimoScraper.Interfaces;
@@ -11,11 +13,13 @@ namespace UltimoScraper.Managers
         private readonly Lazy<ConcurrentDictionary<string, Browser>> _browsers =
             new Lazy<ConcurrentDictionary<string, Browser>>(() => new ConcurrentDictionary<string, Browser>());
 
+        public List<Browser> Browsers => _browsers.Value.Select(x => x.Value).ToList();
+
         public async Task<Browser> GetBrowser(string name)
         {
             if (!_browsers.Value.TryGetValue(name, out var browser))
             {
-                await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
+                await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
                 browser = await Puppeteer.LaunchAsync(new LaunchOptions()
                 {
                     Headless = true,

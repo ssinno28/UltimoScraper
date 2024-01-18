@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using PuppeteerSharp;
 
 namespace UltimoScraper.Interfaces
@@ -7,5 +8,6 @@ namespace UltimoScraper.Interfaces
     {
         Task<Browser> GetBrowser(string name);
         void DisposeBrowser(string name);
+        List<Browser> Browsers { get; }
     }
 }
