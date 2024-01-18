@@ -68,7 +68,7 @@ public class HtmlFetcher : IHtmlFetcher
         {
             await page.GoToAsync(decodedString, pageTimeout, new[]
             {
-                    WaitUntilNavigation.DOMContentLoaded
+                    WaitUntilNavigation.Load
                 });
 
             var pageInteraction =
@@ -90,7 +90,10 @@ public class HtmlFetcher : IHtmlFetcher
             }
 
             _logger.LogDebug($"Finished parse of page {decodedString} for domain {domain}");
+
+            await page.CloseAsync();
             await page.DisposeAsync();
+
             return doc;
         }
         catch (Exception ex)
