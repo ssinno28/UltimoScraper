@@ -68,8 +68,8 @@ public class HtmlFetcher : IHtmlFetcher
         {
             await page.GoToAsync(decodedString, pageTimeout, new[]
             {
-                    WaitUntilNavigation.Load
-                });
+                WaitUntilNavigation.Load
+            });
 
             var pageInteraction =
                 _pageInteractions.FirstOrDefault(x => x.IsMatch(urlWithScheme));
@@ -91,16 +91,20 @@ public class HtmlFetcher : IHtmlFetcher
 
             _logger.LogDebug($"Finished parse of page {decodedString} for domain {domain}");
 
-            await page.CloseAsync();
-            await page.DisposeAsync();
-
             return doc;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Could not go to page {decodedString}");
-            await page.DisposeAsync();
             return null;
+        }
+        finally
+        {
+            if (!page.IsClosed)
+            {
+                await page.CloseAsync();
+            }
+            await page.DisposeAsync();
         }
     }
 }
