@@ -6,6 +6,6 @@ namespace UltimoScraper.Interfaces
     public interface IPageInteraction
     {
         bool IsMatch(string url);
-        Task Interact(Page page);
+        Task Interact(IPage page);
     }
 }

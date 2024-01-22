@@ -105,6 +105,7 @@ public class HtmlFetcher : IHtmlFetcher
                 await page.CloseAsync();
             }
             await page.DisposeAsync();
+            _logger.LogInformation($"Closed and disposed page {page.Url}");
         }
     }
 }

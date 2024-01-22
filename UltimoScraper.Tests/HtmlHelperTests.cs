@@ -15,7 +15,7 @@ namespace UltimoScraper.Tests
             string htmlString = "&nbsp; Hello There! &nbsp;";
             var mockNode = new Mock<HtmlNode>(MockBehavior.Default, HtmlNodeType.Element, new HtmlDocument(), 0);
             mockNode.Setup(x => x.InnerText).Returns(htmlString);
-            Assert.AreEqual("Hello There!", mockNode.Object.GetOnlyInnerText());
+            Assert.Equals("Hello There!", mockNode.Object.GetOnlyInnerText());
         }
 
         [Test]
@@ -33,7 +33,7 @@ namespace UltimoScraper.Tests
             document.LoadHtml(html);
 
             var testNode = document.DocumentNode.QuerySelector(".my-test-class");
-            Assert.AreEqual("article", testNode.GetClosestParentByTagName("article").Name);
+            Assert.Equals("article", testNode.GetClosestParentByTagName("article").Name);
         }   
         
         [Test]
@@ -51,7 +51,7 @@ namespace UltimoScraper.Tests
             document.LoadHtml(html);
 
             var testNode = document.DocumentNode.QuerySelector(".my-test-class");
-            Assert.AreEqual("article", testNode.GetClosestParentByClassName("my-parent-class").Name);
+            Assert.Equals("article", testNode.GetClosestParentByClassName("my-parent-class").Name);
         }
     }
 }

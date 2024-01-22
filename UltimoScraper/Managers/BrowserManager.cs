@@ -10,16 +10,16 @@ namespace UltimoScraper.Managers
 {
     public class BrowserManager : IBrowserManager
     {
-        private readonly Lazy<ConcurrentDictionary<string, Browser>> _browsers =
-            new Lazy<ConcurrentDictionary<string, Browser>>(() => new ConcurrentDictionary<string, Browser>());
+        private readonly Lazy<ConcurrentDictionary<string, IBrowser>> _browsers =
+            new Lazy<ConcurrentDictionary<string, IBrowser>>(() => new ConcurrentDictionary<string, IBrowser>());
 
-        public List<Browser> Browsers => _browsers.Value.Select(x => x.Value).ToList();
+        public List<IBrowser> Browsers => _browsers.Value.Select(x => x.Value).ToList();
 
-        public async Task<Browser> GetBrowser(string name)
+        public async Task<IBrowser> GetBrowser(string name)
         {
             if (!_browsers.Value.TryGetValue(name, out var browser))
             {
-                await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
+                await new BrowserFetcher().DownloadAsync(BrowserTag.Stable);
                 browser = await Puppeteer.LaunchAsync(new LaunchOptions()
                 {
                     Headless = true,

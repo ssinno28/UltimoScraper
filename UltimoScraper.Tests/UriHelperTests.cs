@@ -12,7 +12,7 @@ namespace UltimoScraper.Tests
         {
             string path = "https://fakesite.com/event/concert";
             string path2 = "/event/concert/tomorrow";
-            Assert.True(path.NotSameUri(path2, new Uri("https://fakesite.com")));
+            Assert.Equals(true, path.NotSameUri(path2, new Uri("https://fakesite.com")));
         }
         
         [Test]
@@ -20,7 +20,7 @@ namespace UltimoScraper.Tests
         {
             string path = "/event/concert";
             string path2 = "/event/concert/tomorrow";
-            Assert.True(path.NotSameUri(path2, new Uri("https://fakesite.com")));
+            Assert.Equals(true, path.NotSameUri(path2, new Uri("https://fakesite.com")));
         }
         
         [Test]
@@ -28,7 +28,7 @@ namespace UltimoScraper.Tests
         {
             string path = "https://fakesite.com/event/concert";
             string path2 = "https://fakesite.com/event/concert/tomorrow";
-            Assert.True(path.NotSameUri(path2, new Uri("https://fakesite.com")));
+            Assert.Equals(true, path.NotSameUri(path2, new Uri("https://fakesite.com")));
         }
         
         [Test]
@@ -36,7 +36,7 @@ namespace UltimoScraper.Tests
         {
             string path = "https://fakesite.com/event/concert";
             string path2 = "https://fakesite.com/event/concert";
-            Assert.False(path.NotSameUri(path2, new Uri("https://fakesite.com")));
+            Assert.Equals(false, path.NotSameUri(path2, new Uri("https://fakesite.com")));
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace UltimoScraper.Tests
         {
             string path = "https://fakesite.com/event/concert";
             string path2 = "/event/concert";
-            Assert.False(path.NotSameUri(path2, new Uri("https://fakesite.com")));
+            Assert.Equals(false, path.NotSameUri(path2, new Uri("https://fakesite.com")));
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace UltimoScraper.Tests
         {
             string path = "/event/concert";
             string path2 = "/event/concert";
-            Assert.False(path.NotSameUri(path2, new Uri("https://fakesite.com")));
+            Assert.Equals(false, path.NotSameUri(path2, new Uri("https://fakesite.com")));
         }
     }
 }

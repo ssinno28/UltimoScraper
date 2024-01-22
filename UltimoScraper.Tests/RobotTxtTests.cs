@@ -60,7 +60,7 @@ namespace UltimoScraper.Tests
             var robotsRetriever = _serviceProvider.GetService<IRobotsTxtRetriever>();
             var robots = await robotsRetriever.GetRobotsTxt(new Uri("https://www.fakesite.com"));
 
-            Assert.AreEqual(8, robots.Count);
+            Assert.Equals(8, robots.Count);
         }
 
         [Test]
@@ -73,7 +73,7 @@ namespace UltimoScraper.Tests
             var robotsRetriever = _serviceProvider.GetService<IRobotsTxtRetriever>();
             var robots = await robotsRetriever.GetRobotsTxt(new Uri("https://www.fakesite.com"));
 
-            Assert.False(robots.Any(x => string.IsNullOrEmpty(x.Rule)));
+            Assert.Equals(false, robots.Any(x => string.IsNullOrEmpty(x.Rule)));
         }
         
         [Test]
@@ -86,7 +86,7 @@ namespace UltimoScraper.Tests
             var robotsRetriever = _serviceProvider.GetService<IRobotsTxtRetriever>();
             var robots = await robotsRetriever.GetRobotsTxt(new Uri("https://www.fakesite.com"));
 
-            Assert.AreEqual(13, robots.Count);
+            Assert.Equals(13, robots.Count);
         }
     }
 }

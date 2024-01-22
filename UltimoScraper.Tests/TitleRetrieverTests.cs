@@ -48,7 +48,7 @@ namespace UltimoScraper.Tests
             doc.LoadHtml(_tableList);
 
             var result = metaTitleRetriever.GetTitle(doc.DocumentNode);
-            Assert.AreEqual("Title Test", result);
+            Assert.Equals("Title Test", result);
         }
 
         [Test]
@@ -62,7 +62,7 @@ namespace UltimoScraper.Tests
             doc.LoadHtml(_tableList);
 
             var result = h1TitleRetriever.GetTitle(doc.DocumentNode);
-            Assert.AreEqual("Title H1 Test", result);
+            Assert.Equals("Title H1 Test", result);
         }
     }
 }
