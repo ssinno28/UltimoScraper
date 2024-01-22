@@ -100,6 +100,7 @@ public class HtmlFetcher : IHtmlFetcher
         }
         finally
         {
+            await page.GoToAsync("about:blank");
             if (!page.IsClosed)
             {
                 await page.CloseAsync();
