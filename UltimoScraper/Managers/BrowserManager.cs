@@ -19,7 +19,7 @@ namespace UltimoScraper.Managers
         {
             if (!_browsers.Value.TryGetValue(name, out var browser))
             {
-                await new BrowserFetcher().DownloadAsync(BrowserTag.Stable);
+                await new BrowserFetcher().DownloadAsync();
                 browser = await Puppeteer.LaunchAsync(new LaunchOptions()
                 {
                     Headless = true,
