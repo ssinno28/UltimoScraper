@@ -16,7 +16,7 @@ namespace UltimoScraper.Tests
         {
             string path = "//event/concert";
             path = path.StripDuplicateForwardSlashes();
-            Assert.Equals("/event/concert", path);
+            Assert.That(path, Is.EqualTo("/event/concert"));
         }
         
         [Test]
@@ -24,7 +24,7 @@ namespace UltimoScraper.Tests
         {
             string path = "https://fakesite.com/event/concert";
             path = path.StripDuplicateForwardSlashes();
-            Assert.Equals("https://fakesite.com/event/concert", path);
+            Assert.That(path, Is.EqualTo("https://fakesite.com/event/concert"));
         }
         
         [Test]
@@ -36,7 +36,7 @@ namespace UltimoScraper.Tests
             };
 
             bool result = "I love Field Hockey".MatchesKeyword(keyword);
-            Assert.Equals(true, result);
+            Assert.That(result, Is.True);
         }
         
         [Test]
@@ -49,7 +49,7 @@ namespace UltimoScraper.Tests
             };
 
             bool result = "I love Field Hockey".MatchesKeyword(keyword);
-            Assert.Equals(false, result);
+            Assert.That(result, Is.False);
         }
         
         [Test]
@@ -62,7 +62,7 @@ namespace UltimoScraper.Tests
             };
 
             bool result = "I love Hockey".MatchesKeyword(keyword);
-            Assert.Equals(true,result);
+            Assert.That(result, Is.True);
         }
     }
 }

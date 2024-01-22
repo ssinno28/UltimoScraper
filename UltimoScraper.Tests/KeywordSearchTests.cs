@@ -67,7 +67,7 @@ namespace UltimoScraper.Tests
 
             var result = 
                 await webParser.KeywordSearch("https://www.example.com", new List<IgnoreRule>(), keywords, new List<Keyword>());
-            Assert.Equals(0, result.Count);
+            Assert.That(0, Is.EqualTo(result.Count));
         }
         
         [Test]
@@ -95,7 +95,7 @@ namespace UltimoScraper.Tests
 
             var result = 
                 await webParser.KeywordSearch("https://www.example.com", new List<IgnoreRule>(), keywords, new List<Keyword>());
-            Assert.Equals(1, result.Count);
+            Assert.That(1, Is.EqualTo(result.Count));
         }
     }
 }

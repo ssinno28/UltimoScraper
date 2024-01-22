@@ -2,6 +2,7 @@
 using HtmlAgilityPack;
 using Moq;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 using UltimoScraper.Helpers;
 
 namespace UltimoScraper.Tests
@@ -15,7 +16,7 @@ namespace UltimoScraper.Tests
             string htmlString = "&nbsp; Hello There! &nbsp;";
             var mockNode = new Mock<HtmlNode>(MockBehavior.Default, HtmlNodeType.Element, new HtmlDocument(), 0);
             mockNode.Setup(x => x.InnerText).Returns(htmlString);
-            Assert.Equals("Hello There!", mockNode.Object.GetOnlyInnerText());
+            Assert.That("Hello There!", Is.EqualTo(mockNode.Object.GetOnlyInnerText()));
         }
 
         [Test]
@@ -33,7 +34,7 @@ namespace UltimoScraper.Tests
             document.LoadHtml(html);
 
             var testNode = document.DocumentNode.QuerySelector(".my-test-class");
-            Assert.Equals("article", testNode.GetClosestParentByTagName("article").Name);
+            Assert.That("article", Is.EqualTo(testNode.GetClosestParentByTagName("article").Name));
         }   
         
         [Test]
@@ -51,7 +52,7 @@ namespace UltimoScraper.Tests
             document.LoadHtml(html);
 
             var testNode = document.DocumentNode.QuerySelector(".my-test-class");
-            Assert.Equals("article", testNode.GetClosestParentByClassName("my-parent-class").Name);
+            Assert.That("article", Is.EqualTo(testNode.GetClosestParentByClassName("my-parent-class").Name));
         }
     }
 }

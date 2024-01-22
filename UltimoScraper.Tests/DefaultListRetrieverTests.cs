@@ -59,7 +59,7 @@ namespace UltimoScraper.Tests
 
             var result = 
                 await listRetriever.GetParsedLists(doc.DocumentNode.SelectSingleNode("/html[1]/body[1]"), new List<IgnoreRule>());
-            Assert.Equals(result.Count, 0);
+            Assert.That(result.Count, Is.EqualTo(0));
         }
 
         [Test]

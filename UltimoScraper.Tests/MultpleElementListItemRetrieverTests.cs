@@ -51,8 +51,8 @@ namespace UltimoScraper.Tests
 
             var result = 
                 await listRetriever.GetParsedLists(doc.DocumentNode.SelectSingleNode("/html[1]/body[1]"), new List<IgnoreRule>());
-            Assert.Equals(1, result.Count);
-            Assert.Equals(8, result.First().ListItems.Count);
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result.First().ListItems.Count, Is.EqualTo(8));
         }
     }
 }

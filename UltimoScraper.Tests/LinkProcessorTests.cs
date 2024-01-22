@@ -41,7 +41,7 @@ namespace UltimoScraper.Tests
                 Value = "https://twitter.com/TestSite"
             };
             var result = await twitterLinkProcessor.Process(twitterLink, new List<Keyword>());
-            Assert.Equals(true, result);
+            Assert.That(result, Is.True);
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace UltimoScraper.Tests
             };
 
             var result = await facebookLinkProcessor.Process(facebookLink, new List<Keyword>());
-            Assert.Equals(true, result);
+            Assert.That(result, Is.True);
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace UltimoScraper.Tests
             };
 
             var result = await instagramLinkProcessor.Process(instagramLink, new List<Keyword>());
-            Assert.Equals(true, result);
+            Assert.That(result, Is.True);
         }
     }
 }

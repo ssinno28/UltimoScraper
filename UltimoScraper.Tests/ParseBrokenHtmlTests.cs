@@ -40,7 +40,7 @@ namespace UltimoScraper.Tests
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(brokenParagraphList);
 
-            Assert.Equals(0, doc.ParseErrors.Count());
+            Assert.That(doc.ParseErrors.Count(), Is.EqualTo(0));
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace UltimoScraper.Tests
 
             doc = threader.Thread(doc);
 
-            Assert.Equals(0, doc.ParseErrors.Count());
+            Assert.That(doc.ParseErrors.Count(), Is.EqualTo(0));
         }
     }
 }
