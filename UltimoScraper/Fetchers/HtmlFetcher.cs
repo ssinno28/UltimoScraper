@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -100,13 +101,14 @@ public class HtmlFetcher : IHtmlFetcher
         }
         finally
         {
-            await page.GoToAsync("about:blank");
             if (!page.IsClosed)
             {
                 await page.CloseAsync();
+                _logger.LogInformation($"Page {page.Url} has been closed.");
             }
+
             await page.DisposeAsync();
-            _logger.LogInformation($"Closed and disposed page {page.Url}");
+            _logger.LogInformation($"Page {page.Url} has been disposed.");
         }
     }
 }

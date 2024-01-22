@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using PuppeteerSharp;
@@ -32,14 +33,21 @@ namespace UltimoScraper.Managers
             return browser;
         }
 
-        public void DisposeBrowser(string name)
+        public async Task DisposeBrowser(string name)
         {
             if (!_browsers.Value.TryGetValue(name, out var browser))
             {
                 return;
             }
 
-            browser.Dispose();
+            await browser.CloseAsync();
+            await browser.DisposeAsync();
+
+            var chromeProcess = Process.GetProcesses().FirstOrDefault(x => x.Id == browser.Process.Id);
+            if (chromeProcess != null)
+            {
+                chromeProcess.Kill();
+            }
 
             _browsers.Value.TryRemove(name, out _);
         }

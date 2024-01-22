@@ -7,7 +7,7 @@ namespace UltimoScraper.Interfaces
     public interface IBrowserManager
     {
         Task<IBrowser> GetBrowser(string name);
-        void DisposeBrowser(string name);
+        Task DisposeBrowser(string name);
         List<IBrowser> Browsers { get; }
     }
 }
