@@ -24,7 +24,7 @@ namespace UltimoScraper.Managers
                 browser = await Puppeteer.LaunchAsync(new LaunchOptions()
                 {
                     Headless = true,
-                    Args = new[] { "--no-sandbox" }
+                    Args = new[] { "--no-sandbox", "--single-process", "--no-zygote" }
                 });
                 
                 _browsers.Value.TryAdd(name, browser);
@@ -38,6 +38,16 @@ namespace UltimoScraper.Managers
             if (!_browsers.Value.TryGetValue(name, out var browser))
             {
                 return;
+            }
+
+            var pages = await browser.PagesAsync();
+            foreach (var page in pages)
+            {
+                if (!page.IsClosed)
+                {
+                    await page.CloseAsync();
+                    await page.DisposeAsync();
+                }
             }
 
             await browser.CloseAsync();
