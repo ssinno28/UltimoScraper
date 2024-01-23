@@ -54,7 +54,8 @@ namespace UltimoScraper.Managers
                 browser = await extra.LaunchAsync(new LaunchOptions()
                 {
                     Headless = true,
-                    Browser = SupportedBrowser.Chrome
+                    Browser = SupportedBrowser.Chrome,
+                    Args = new[] { "--no-sandbox" }
                 });
 
                 _browsers.Value.TryAdd(name, browser);
