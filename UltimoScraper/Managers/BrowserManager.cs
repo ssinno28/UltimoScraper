@@ -49,15 +49,17 @@ namespace UltimoScraper.Managers
                 }
             }
 
-            await browser.CloseAsync();
-
-            var chromeProcess = Process.GetProcesses().FirstOrDefault(x => x.Id == browser.Process.Id);
-            if (chromeProcess != null)
+            browser.Disconnect();
+            browser.Disconnected += (sender, args) =>
             {
-                chromeProcess.Kill();
-            }
+                var chromeProcess = Process.GetProcesses().FirstOrDefault(x => x.Id == browser.Process.Id);
+                if (chromeProcess != null)
+                {
+                    chromeProcess.Kill();
+                }
 
-            _browsers.Value.TryRemove(name, out _);
+                _browsers.Value.TryRemove(name, out _);
+            };
         }
     }
 }

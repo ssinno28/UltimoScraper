@@ -67,7 +67,10 @@ public class HtmlFetcher : IHtmlFetcher
 
         try
         {
-            await page.GoToAsync(decodedString, pageTimeout);
+            await page.GoToAsync(decodedString, pageTimeout, new[]
+            {
+                WaitUntilNavigation.Load
+            });
 
             var pageInteraction =
                 _pageInteractions.FirstOrDefault(x => x.IsMatch(urlWithScheme));
