@@ -25,12 +25,12 @@ public class HtmlFetcher : IHtmlFetcher
     private readonly IEnumerable<IHtmlDocThreader> _htmlDocThreaders;
     private readonly IEnumerable<IPageInteraction> _pageInteractions;
 
-    public HtmlFetcher(ILogger<HtmlFetcher> logger, 
-        IBrowserManager viewManager, 
-        Action<string> throttleFunc, 
-        IOptions<ScraperConfig> scraperConfig, 
-        IEnumerable<IHtmlThreader> htmlThreaders, 
-        IEnumerable<IHtmlDocThreader> htmlDocThreaders, 
+    public HtmlFetcher(ILogger<HtmlFetcher> logger,
+        IBrowserManager viewManager,
+        Action<string> throttleFunc,
+        IOptions<ScraperConfig> scraperConfig,
+        IEnumerable<IHtmlThreader> htmlThreaders,
+        IEnumerable<IHtmlDocThreader> htmlDocThreaders,
         IEnumerable<IPageInteraction> pageInteractions)
     {
         _logger = logger;
@@ -103,8 +103,10 @@ public class HtmlFetcher : IHtmlFetcher
         {
             if (!page.IsClosed)
             {
+                await page.GoToAsync("about:blank");
                 await page.CloseAsync();
-                _logger.LogInformation($"Page {page.Url} has been closed.");
+                string closed = page.IsClosed ? "Closed" : "Not Closed";
+                _logger.LogInformation($"Page {page.Url} is {closed}.");
             }
         }
     }
