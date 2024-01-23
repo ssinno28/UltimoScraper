@@ -67,10 +67,7 @@ public class HtmlFetcher : IHtmlFetcher
 
         try
         {
-            await page.GoToAsync(decodedString, pageTimeout, new[]
-            {
-                WaitUntilNavigation.Load
-            });
+            await page.GoToAsync(decodedString, pageTimeout);
 
             var pageInteraction =
                 _pageInteractions.FirstOrDefault(x => x.IsMatch(urlWithScheme));
@@ -106,9 +103,6 @@ public class HtmlFetcher : IHtmlFetcher
                 await page.CloseAsync();
                 _logger.LogInformation($"Page {page.Url} has been closed.");
             }
-
-            await page.DisposeAsync();
-            _logger.LogInformation($"Page {page.Url} has been disposed.");
         }
     }
 }

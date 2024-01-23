@@ -46,12 +46,10 @@ namespace UltimoScraper.Managers
                 if (!page.IsClosed)
                 {
                     await page.CloseAsync();
-                    await page.DisposeAsync();
                 }
             }
 
             await browser.CloseAsync();
-            await browser.DisposeAsync();
 
             var chromeProcess = Process.GetProcesses().FirstOrDefault(x => x.Id == browser.Process.Id);
             if (chromeProcess != null)
