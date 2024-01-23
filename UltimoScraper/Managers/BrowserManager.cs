@@ -24,7 +24,7 @@ namespace UltimoScraper.Managers
                 browser = await Puppeteer.LaunchAsync(new LaunchOptions()
                 {
                     Headless = true,
-                    Args = new[] { "--no-sandbox", "--single-process", "--no-zygote" }
+                    Args = new[] { "--no-sandbox" }
                 });
                 
                 _browsers.Value.TryAdd(name, browser);
