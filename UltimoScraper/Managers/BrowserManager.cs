@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using PuppeteerSharp;
+using PuppeteerSharp.BrowserData;
 using UltimoScraper.Interfaces;
 
 namespace UltimoScraper.Managers
@@ -20,11 +21,10 @@ namespace UltimoScraper.Managers
         {
             if (!_browsers.Value.TryGetValue(name, out var browser))
             {
-                await new BrowserFetcher().DownloadAsync();
+               var installedBrowser = await new BrowserFetcher(SupportedBrowser.Firefox).DownloadAsync();
                 browser = await Puppeteer.LaunchAsync(new LaunchOptions()
                 {
                     Headless = true,
-                    Args = new[] { "--no-sandbox" },
                     Browser = SupportedBrowser.Firefox
                 });
                 
