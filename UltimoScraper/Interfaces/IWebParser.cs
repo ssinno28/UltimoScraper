@@ -11,7 +11,8 @@ namespace UltimoScraper.Interfaces
             string domain, 
             IList<IgnoreRule> ignoreRules, 
             IList<Keyword> keywords,
-            string sessionName = null);
+            string sessionName = null,
+            int? maxDepth = null);
 
         Task<IList<string>> KeywordSearch(
             string domain,

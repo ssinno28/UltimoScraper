@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Web;
 using UltimoScraper.Models;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace UltimoScraper.Helpers
 {

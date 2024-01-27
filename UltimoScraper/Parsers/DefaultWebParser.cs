@@ -18,6 +18,7 @@ namespace UltimoScraper.Parsers
     public class DefaultWebParser : IWebParser
     {
         private readonly object _thisLock = new object();
+        private readonly object _thisLimitLock = new object();
 
         private readonly IEnumerable<ILinkRetriever> _linkRetrievers;
         private readonly IEnumerable<ITitleRetriever> _titleRetrievers;
@@ -43,7 +44,8 @@ namespace UltimoScraper.Parsers
             string domain,
             IList<IgnoreRule> ignoreRules,
             IList<Keyword> keywords,
-            string sessionName = null)
+            string sessionName = null,
+            int? maxDepth = null)
         {
             var siteLink = new ParsedWebLink { Value = domain };
             var knownLinks = new List<ParsedWebLink>();
@@ -63,7 +65,9 @@ namespace UltimoScraper.Parsers
                     ignoreRules,
                     keywords,
                     pagesPerKeyword,
-                    sessionName);
+                    sessionName,
+                    maxDepth,
+                    0);
 
             return new ParsedSite
             {
@@ -194,8 +198,11 @@ namespace UltimoScraper.Parsers
             IList<IgnoreRule> ignoreRules,
             IList<Keyword> keywords,
             IDictionary<string, IList<ParsedPage>> pagesPerKeyword,
-            string sessionName)
+            string sessionName,
+            int? maxDepth = null,
+            int currentDepth = 0)
         {
+            currentDepth++;
 
             HtmlDocument doc = await _htmlFetcher.GetPageHtml(domain, linkToPage.Value, sessionName);
             if (doc == null) return null;
@@ -216,21 +223,45 @@ namespace UltimoScraper.Parsers
                 knownLinks.AddRange(webLinks);
             }
 
-            foreach (var webLink in webLinks)
+            if (maxDepth.HasValue && currentDepth <= maxDepth.Value)
             {
-                if (!webLink.Value.IsSiteDomain(domain))
+                foreach (var webLink in webLinks)
                 {
-                    continue;
+                    if(currentDepth >= maxDepth.Value) break;
+
+                    if (!webLink.Value.IsSiteDomain(domain))
+                    {
+                        continue;
+                    }
+
+                    if (webLink.Value.StartsWith("mailto") ||
+                        webLink.Value.StartsWith("webcal") ||
+                        webLink.Value.Contains("twitter") ||
+                        webLink.Value.Contains("instagram") ||
+                        webLink.Value.Contains("facebook")
+                        ) continue;
+
+                    parsedPage.ChildPages.Add(await ParsePages(domain, webLink, knownLinks, ignoreRules, keywords, pagesPerKeyword, sessionName, maxDepth, currentDepth));
                 }
+            }
+            else
+            {
+                foreach (var webLink in webLinks)
+                {
+                    if (!webLink.Value.IsSiteDomain(domain))
+                    {
+                        continue;
+                    }
 
-                if (webLink.Value.StartsWith("mailto") ||
-                    webLink.Value.StartsWith("webcal") ||
-                    webLink.Value.Contains("twitter") ||
-                    webLink.Value.Contains("instagram") ||
-                    webLink.Value.Contains("facebook")
-                    ) continue;
+                    if (webLink.Value.StartsWith("mailto") ||
+                        webLink.Value.StartsWith("webcal") ||
+                        webLink.Value.Contains("twitter") ||
+                        webLink.Value.Contains("instagram") ||
+                        webLink.Value.Contains("facebook")
+                       ) continue;
 
-                parsedPage.ChildPages.Add(await ParsePages(domain, webLink, knownLinks, ignoreRules, keywords, pagesPerKeyword, sessionName));
+                    parsedPage.ChildPages.Add(await ParsePages(domain, webLink, knownLinks, ignoreRules, keywords, pagesPerKeyword, sessionName));
+                }
             }
 
             string title = GetDocumentTitle(doc) ?? linkToPage.Value;
@@ -266,6 +297,7 @@ namespace UltimoScraper.Parsers
             parsedPage.Title = title;
             parsedPage.MatchedKeywords = matchedKeywords;
             parsedPage.LinkToPage = linkToPage;
+
 
             return parsedPage;
         }

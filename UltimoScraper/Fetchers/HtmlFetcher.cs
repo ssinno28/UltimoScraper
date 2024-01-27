@@ -103,10 +103,11 @@ public class HtmlFetcher : IHtmlFetcher
         {
             if (!page.IsClosed)
             {
+                string currentPageUrl = page.Url;
                 await page.GoToAsync("about:blank");
                 await page.CloseAsync();
                 string closed = page.IsClosed ? "Closed" : "Not Closed";
-                _logger.LogInformation($"Page {page.Url} is {closed}.");
+                _logger.LogInformation($"Page {currentPageUrl} is {closed}.");
             }
         }
     }
