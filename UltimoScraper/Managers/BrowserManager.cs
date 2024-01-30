@@ -35,7 +35,7 @@ namespace UltimoScraper.Managers
         public async Task<IBrowser> GetBrowser(string name)
         {
             var chromeProcesses = Process.GetProcesses().Where(x => x.ProcessName.Contains("chrome"));
-            if (chromeProcesses.Count() > (_scraperConfig.MaxProcesses ?? 10))
+            if (chromeProcesses.Count() > (_scraperConfig.MaxProcesses ?? 15))
             {
                 _logger.LogDebug($"Max number of processes hit for session {name}, disposing browser and restarting");
                 await DisposeBrowser(name);
