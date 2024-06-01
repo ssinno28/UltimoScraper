@@ -34,10 +34,10 @@ namespace UltimoScraper.Retrievers.Lists
 
         public async Task<IList<ParsedList>> GetParsedLists(HtmlNode node, IList<IgnoreRule> ignoreRules)
         {
-            return await GetLists(node, new HashSet<string>(), ignoreRules);
+            return await GetLists(node, new HashSet<string>(), new HashSet<string>(), ignoreRules);
         }
 
-        private async Task<IList<ParsedList>> GetLists(HtmlNode node, HashSet<string> parsedPaths, IList<IgnoreRule> ignoreRules)
+        private async Task<IList<ParsedList>> GetLists(HtmlNode node, HashSet<string> parsedPaths, HashSet<string> listItemPaths, IList<IgnoreRule> ignoreRules)
         {
             Logger.LogDebug($"Getting lists for {node.XPath}");
 
@@ -51,23 +51,34 @@ namespace UltimoScraper.Retrievers.Lists
 
             var listItems = new List<ParsedListItem>();
             string listRetrieverType = string.Empty;
-            foreach (var listItemRetriever in _listItemRetrievers)
+            if (!listItemPaths.Contains(node.XPath))
             {
-                var nodeListItems = await listItemRetriever.GetListItems(node);
-                if (!nodeListItems.Any())
+                foreach (var listItemRetriever in _listItemRetrievers)
                 {
-                    continue;
-                }
+                    var nodeListItems = await listItemRetriever.GetListItems(node);
+                    if (!nodeListItems.Any())
+                    {
+                        continue;
+                    }
 
-                listRetrieverType = listItemRetriever.GetType().Name;
-                listItems.AddRange(nodeListItems);
+                    listRetrieverType = listItemRetriever.GetType().Name;
+                    listItems.AddRange(nodeListItems);
+                    foreach (var parsedListItem in nodeListItems)
+                    {
+                        listItemPaths.Add(parsedListItem.XPath);
+                        foreach (var content in parsedListItem.Contents)
+                        {
+                            listItemPaths.Add(content.XPath);
+                        }
+                    }
+                }
             }
 
             // only check the first child as subsequent logic will get the child's siblings
             var firstChild = node.GetFirstChild();
             if (firstChild != null && !parsedPaths.Contains(firstChild.XPath))
             {
-                lists.AddRange(await GetLists(firstChild, parsedPaths, ignoreRules));
+                lists.AddRange(await GetLists(firstChild, parsedPaths, listItemPaths, ignoreRules));
             }
 
             var nextSibling = node.GetNextSibling();
@@ -75,7 +86,7 @@ namespace UltimoScraper.Retrievers.Lists
             {
                 if (!parsedPaths.Contains(nextSibling.XPath))
                 {
-                    lists.AddRange(await GetLists(nextSibling, parsedPaths, ignoreRules));
+                    lists.AddRange(await GetLists(nextSibling, parsedPaths, listItemPaths, ignoreRules));
                 }
 
                 nextSibling = nextSibling.GetNextSibling();
