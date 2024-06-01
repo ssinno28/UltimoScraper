@@ -91,7 +91,6 @@ public class HtmlFetcher : IHtmlFetcher
             }
 
             _logger.LogDebug($"Finished parse of page {decodedString} for domain {domain}");
-
             return doc;
         }
         catch (Exception ex)

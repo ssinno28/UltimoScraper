@@ -58,6 +58,9 @@
     <None Update="Samples\DefaultListItemRetriever\full-page-sample.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Samples\find-table-list-sample.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Samples\full-page-sample.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

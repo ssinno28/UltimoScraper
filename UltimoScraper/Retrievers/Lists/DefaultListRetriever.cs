@@ -59,14 +59,8 @@ namespace UltimoScraper.Retrievers.Lists
                     continue;
                 }
 
-                foreach (HtmlNode htmlNode in nodeListItems.SelectMany(x => x.Contents))
-                {
-                    parsedPaths.Add(htmlNode.XPath);
-                }
-
                 listRetrieverType = listItemRetriever.GetType().Name;
                 listItems.AddRange(nodeListItems);
-                break;
             }
 
             // only check the first child as subsequent logic will get the child's siblings

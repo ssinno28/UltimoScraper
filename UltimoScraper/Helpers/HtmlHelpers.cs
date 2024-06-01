@@ -10,7 +10,7 @@ namespace UltimoScraper.Helpers
             HtmlNode sibling = null;
             while (sibling == null && node.NextSibling != null)
             {
-                if (node.NextSibling.NodeType == HtmlNodeType.Text || node.NextSibling.NodeType == HtmlNodeType.Comment || node.NextSibling.Name.Equals("br"))
+                if (node.NextSibling.NodeType == HtmlNodeType.Text || node.NextSibling.NodeType == HtmlNodeType.Comment || node.NextSibling.Name.Equals("br") || node.NextSibling.Name.Equals("script"))
                 {
                     node = node.NextSibling;
                     continue;

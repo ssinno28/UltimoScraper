@@ -22,6 +22,7 @@ namespace UltimoScraper.Tests
         private IServiceProvider _applicationContainer;
         private string _fullPageSample;
         private string _noListSample;
+        private string _findTableListSample;
 
         [SetUp]
         public void FixtureSetup()
@@ -38,6 +39,12 @@ namespace UltimoScraper.Tests
             using (StreamReader reader = new StreamReader(stream))
             {
                 _noListSample = reader.ReadToEnd();
+            }
+            
+            using (Stream stream = File.OpenRead(Path.Combine(assembly.GetAssemblyDirectory(), "Samples", "find-table-list-sample.html")))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                _findTableListSample = reader.ReadToEnd();
             }
 
             // Create the container builder.
@@ -60,6 +67,18 @@ namespace UltimoScraper.Tests
             var result = 
                 await listRetriever.GetParsedLists(doc.DocumentNode.SelectSingleNode("/html[1]/body[1]"), new List<IgnoreRule>());
             Assert.That(result.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task Test_Finds_Nested_Table_List()
+        {
+            var listRetriever = _applicationContainer.GetService<IListRetriever>();
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(_findTableListSample);
+
+            var result =
+                await listRetriever.GetParsedLists(doc.DocumentNode.SelectSingleNode("/html[1]/body[1]"), new List<IgnoreRule>());
+            Assert.That(result.Count, Is.GreaterThan(0));
         }
 
         [Test]
