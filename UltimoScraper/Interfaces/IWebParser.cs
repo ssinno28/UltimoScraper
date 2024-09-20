@@ -8,11 +8,12 @@ namespace UltimoScraper.Interfaces
     public interface IWebParser
     {
         Task<ParsedSite> ParseSite(
-            string domain, 
-            IList<IgnoreRule> ignoreRules, 
+            string domain,
+            IList<IgnoreRule> ignoreRules,
             IList<Keyword> keywords,
-            string sessionName = null,
-            int? maxDepth = null);
+            int maxDepth,
+            int maxPages,
+            string sessionName = null);
 
         Task<IList<string>> KeywordSearch(
             string domain,

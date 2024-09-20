@@ -18,7 +18,9 @@ namespace UltimoScraper.Parsers
     public class DefaultWebParser : IWebParser
     {
         private readonly object _thisLock = new object();
+        private readonly object _thisPagesLock = new object();
         private readonly object _thisLimitLock = new object();
+        private readonly IList<ParsedPage> _allParsedPages = new List<ParsedPage>();
 
         private readonly IEnumerable<ILinkRetriever> _linkRetrievers;
         private readonly IEnumerable<ITitleRetriever> _titleRetrievers;
@@ -44,8 +46,9 @@ namespace UltimoScraper.Parsers
             string domain,
             IList<IgnoreRule> ignoreRules,
             IList<Keyword> keywords,
-            string sessionName = null,
-            int? maxDepth = null)
+            int maxDepth,
+            int maxPages,
+            string sessionName = null)
         {
             var siteLink = new ParsedWebLink { Value = domain };
             var knownLinks = new List<ParsedWebLink>();
@@ -67,6 +70,7 @@ namespace UltimoScraper.Parsers
                     pagesPerKeyword,
                     sessionName,
                     maxDepth,
+                    maxPages,
                     0);
 
             return new ParsedSite
@@ -199,7 +203,8 @@ namespace UltimoScraper.Parsers
             IList<Keyword> keywords,
             IDictionary<string, IList<ParsedPage>> pagesPerKeyword,
             string sessionName,
-            int? maxDepth = null,
+            int maxDepth,
+            int maxPages,
             int currentDepth = 0)
         {
             currentDepth++;
@@ -223,45 +228,23 @@ namespace UltimoScraper.Parsers
                 knownLinks.AddRange(webLinks);
             }
 
-            if (maxDepth.HasValue && currentDepth <= maxDepth.Value)
+            foreach (var webLink in webLinks)
             {
-                foreach (var webLink in webLinks)
+                if (currentDepth >= maxDepth || _allParsedPages.Count() >= maxPages) break;
+
+                if (!webLink.Value.IsSiteDomain(domain))
                 {
-                    if(currentDepth >= maxDepth.Value) break;
-
-                    if (!webLink.Value.IsSiteDomain(domain))
-                    {
-                        continue;
-                    }
-
-                    if (webLink.Value.StartsWith("mailto") ||
-                        webLink.Value.StartsWith("webcal") ||
-                        webLink.Value.Contains("twitter") ||
-                        webLink.Value.Contains("instagram") ||
-                        webLink.Value.Contains("facebook")
-                        ) continue;
-
-                    parsedPage.ChildPages.Add(await ParsePages(domain, webLink, knownLinks, ignoreRules, keywords, pagesPerKeyword, sessionName, maxDepth, currentDepth));
+                    continue;
                 }
-            }
-            else
-            {
-                foreach (var webLink in webLinks)
-                {
-                    if (!webLink.Value.IsSiteDomain(domain))
-                    {
-                        continue;
-                    }
 
-                    if (webLink.Value.StartsWith("mailto") ||
-                        webLink.Value.StartsWith("webcal") ||
-                        webLink.Value.Contains("twitter") ||
-                        webLink.Value.Contains("instagram") ||
-                        webLink.Value.Contains("facebook")
-                       ) continue;
+                if (webLink.Value.StartsWith("mailto") ||
+                    webLink.Value.StartsWith("webcal") ||
+                    webLink.Value.Contains("twitter") ||
+                    webLink.Value.Contains("instagram") ||
+                    webLink.Value.Contains("facebook")
+                    ) continue;
 
-                    parsedPage.ChildPages.Add(await ParsePages(domain, webLink, knownLinks, ignoreRules, keywords, pagesPerKeyword, sessionName));
-                }
+                parsedPage.ChildPages.Add(await ParsePages(domain, webLink, knownLinks, ignoreRules, keywords, pagesPerKeyword, sessionName, maxDepth, maxPages, currentDepth));
             }
 
             string title = GetDocumentTitle(doc) ?? linkToPage.Value;
@@ -298,7 +281,10 @@ namespace UltimoScraper.Parsers
             parsedPage.MatchedKeywords = matchedKeywords;
             parsedPage.LinkToPage = linkToPage;
 
-
+            lock (_thisPagesLock)
+            {
+                _allParsedPages.Add(parsedPage);
+            }
             return parsedPage;
         }
 
