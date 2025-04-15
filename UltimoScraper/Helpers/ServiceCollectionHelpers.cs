@@ -53,6 +53,8 @@ namespace UltimoScraper.Helpers
             {
                 config.PageThrottle = Convert.ToInt32(configuration["Scraper:PageThrottle"]);
                 config.PageTimeout = Convert.ToInt32(configuration["Scraper:PageTimeout"]);
+                config.MaxProcesses = Convert.ToInt32(configuration["Scraper:MaxProcesses"]);
+                config.Headless = Convert.ToBoolean(configuration["Scraper:Headless"]);
             });
 
             serviceCollection.AddTransient(ThrottleFunc);
