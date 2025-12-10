@@ -71,6 +71,33 @@ Create ignore rules targeting:
 - **Links** - Filter specific URLs
 - **Lists** - Ignore HTML elements matching criteria
 
+Simply create a list of ignore rules and pass it to the ParseSite method:
+
+```csharp
+ var ignoreRules = new List<IgnoreRule>()
+        {
+            new()
+            {
+                IgnoreRuleType = IgnoreRuleType.Link,
+                Rule = "OnlineRegistration"
+            }
+        };
+ var result = await _webParser.ParseSite(domain, ignoreRules, keywords);
+```
+
+### Keywords
+Keywords are a prerequisit for running the scraper as it lets it know exactly what type of content you are looking for. Similarly to IgnoreRules, Keywords also needs to be supplied to the ParseSite method, where links can either match on the `Value` or the `Regex` properties of the keyword. Regex can be left null, but should be used if you want to narrow down your matches, for example if you wanted to match on golf, that could also potentially match on disc golf, Example:
+
+```csharp
+new Keyword {
+    Value = "golf",
+    Regex = "\\b(?<!disc\\s)golf\\b"
+}
+```
+
+The regex ensures that any potential matches on disc golf would be ignored.
+
+
 ### Page Interactions
 Execute JavaScript during scraping to wait for dynamic content:
 
