@@ -8,7 +8,7 @@ A web scraper designed with ethics and responsibility at its core. UltimoScraper
 UltimoScraper includes `RobotsTxtRetriever.cs` to fetch and parse robots.txt files. Always retrieve and respect the ignore rules:
 
 ```csharp
-var robotsRetriever = new RobotsTxtRetriever();
+var robotsRetriever = serviceProvider.GetRequiredService<IRobotsTxtRetriever>();
 var ignoreRules = await robotsRetriever.GetIgnoreRulesAsync("https://example.com");
 ```
 
