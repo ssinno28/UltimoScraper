@@ -5,6 +5,7 @@ namespace UltimoScraper.Models
 {
     public class ParsedPage
     {
+        public HtmlDocument Document { get; set; }
         public List<ParsedWebLink> WebLinks { get; set; }
         public IList<string> MatchedKeywords { get; set; }
         public HtmlNode BodyHtmlNode { get; set; }

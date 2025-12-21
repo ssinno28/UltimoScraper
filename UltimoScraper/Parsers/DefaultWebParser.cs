@@ -276,6 +276,7 @@ namespace UltimoScraper.Parsers
 
             parsedPage.WebLinks = webLinks;
             parsedPage.BodyHtmlNode = bodyHtmlNode;
+            parsedPage.Document = doc;
             parsedPage.Url = linkToPage.Value;
             parsedPage.Title = title;
             parsedPage.MatchedKeywords = matchedKeywords;
