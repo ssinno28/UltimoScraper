@@ -2,6 +2,9 @@
 
 A web scraper designed with ethics and responsibility at its core. UltimoScraper provides a flexible, extensible framework for web scraping while respecting website resources and following best practices.
 
+UltimoScraper main function is to scan an entire website for pages that match specific keywords provided. It can also extract specific pieces of content (social media links) along the way. Once it has completed you can access a dictionary 
+where the key is the keyword and the value is a list of pages that matches that keyword. From there you can then perform more in depth data extraction from those pages based on the keywords that were matched. 
+
 ## Ethical Scraping
 
 ### Robots.txt Compliance
@@ -14,6 +17,33 @@ var ignoreRules = await robotsRetriever.GetIgnoreRulesAsync("https://example.com
 
 ### Request Throttling
 Built-in throttling prevents overwhelming target websites, ensuring scraping doesn't negatively impact their performance.
+
+### Max Depth & Pages
+Sites are hierarchical, so if I want to say only scrape a max depth of 3, then for every page linked on the home page it will only scrape up to three pages (Home Page -> Blog -> Blog Post). This is important for sites with an incredible amount of content. You can also specify a max number of unique pages scraped, once it hits the max, it will stop scraping. The scraper will exit once it hits either the max depth or the max pages.
+
+The WebParser is the interface you should interact with, here are the methods it offers:
+
+```csharp
+ public interface IWebParser
+    {
+        Task<ParsedSite> ParseSite(
+            string domain,
+            IList<IgnoreRule> ignoreRules,
+            IList<Keyword> keywords,
+            int maxDepth,
+            int maxPages,
+            string sessionName = null);
+
+        Task<IList<string>> KeywordSearch(
+            string domain,
+            IList<IgnoreRule> ignoreRules,
+            IList<Keyword> keywords,
+            IList<Keyword> searchKeywords,
+            string sessionName = null);
+        Task<ParsedPage> ParsePage(string domain, string path, IList<IgnoreRule> ignoreRules, IList<Keyword> keywords, string sessionName = null);
+    }
+```
+
 
 ## Extensibility
 
